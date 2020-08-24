@@ -78,8 +78,8 @@ class TestRoboLabPlanet(unittest.TestCase):
 
     def test_same_length(self):
         """
-        This test should check that the shortest-path algorithm implemented also can return alternative routes with the
-        same cost (weight) to a specific target
+        This test should check that the shortest-path algorithm implemented returns a shortest path even if there
+        are multiple shortest paths with the same length.
 
         Requirement: Minimum of two paths with same cost exists, only one is returned by the logic implemented
         """
