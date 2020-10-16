@@ -5,6 +5,7 @@ import logging
 import os
 import paho.mqtt.client as mqtt
 import uuid
+import signal
 
 from communication import Communication
 from odometry import Odometry
@@ -39,5 +40,18 @@ def run():
 
 
 # DO NOT EDIT
+def signal_handler(sig, frame):
+    if client and client.is_connected():
+        client.disconnect()
+    raise KeyboardInterrupt()
+
+
+signal.signal(signal.SIGINT, signal_handler)
+
 if __name__ == '__main__':
-    run()
+    try:
+        run()
+        signal_handler()
+    except Exception as e:
+        signal_handler()
+        raise e
