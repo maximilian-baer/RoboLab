@@ -40,18 +40,18 @@ def run():
 
 
 # DO NOT EDIT
-def signal_handler(sig, frame):
+def signal_handler(sig=None, frame=None, raise_interrupt=True):
     if client and client.is_connected():
         client.disconnect()
-    raise KeyboardInterrupt()
+    if raise_interrupt:
+        raise KeyboardInterrupt()
 
-
-signal.signal(signal.SIGINT, signal_handler)
 
 if __name__ == '__main__':
+    signal.signal(signal.SIGINT, signal_handler)
     try:
         run()
-        signal_handler()
+        signal_handler(raise_interrupt=False)
     except Exception as e:
-        signal_handler()
+        signal_handler(raise_interrupt=False)
         raise e
