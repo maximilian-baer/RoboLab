@@ -19,7 +19,7 @@ import subprocess
 import sys
 
 # Store path to executable
-DEPLOY_EXECUTABLE = "./robolab-deploy/deploy.py"
+DEPLOY_EXECUTABLE = "./robolab-deploy/mothershipdeploy.py"
 # Windows-Fix: Get the full executable path, windows can't handle our shebang
 PYTHON_EXECUTABLE = sys.executable
 
