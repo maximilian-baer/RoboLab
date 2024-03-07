@@ -6,6 +6,7 @@ import os
 import paho.mqtt.client as mqtt
 import uuid
 import signal
+import time
 
 from communication import Communication
 from odometry import Odometry
@@ -21,7 +22,7 @@ def run():
     # Your script isn't able to close the client after crashing.
     global client
 
-    client_id = 'YOURGROUPID-' + str(uuid.uuid4())  # Replace YOURGROUPID with your group ID
+    client_id = '013-' + str(uuid.uuid4())  # Replace YOURGROUPID with your group ID
     client = mqtt.Client(client_id=client_id,  # Unique Client-ID to recognize our program
                          clean_session=True,  # We want a clean session after disconnect or abort/crash
                          protocol=mqtt.MQTTv311  # Define MQTT protocol version
@@ -41,7 +42,17 @@ def run():
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
 
     print("Hello World!")
+    m = ev3.LargeMotor("outB")
+    m.reset()
+    m.stop_action = "brake"
+    m.speed_sp = 100
+    m.command = "run-forever"
+    time.sleep(3)
 
+    m.speed_sp = 200
+    m.command = "run-forever"
+    time.sleep(3)
+    m.stop()
 
 # DO NOT EDIT
 def signal_handler(sig=None, frame=None, raise_interrupt=True):
