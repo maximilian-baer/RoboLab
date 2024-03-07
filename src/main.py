@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import ev3dev.core
+import json
 import ev3dev.ev3 as ev3
 import logging
 import os
@@ -44,14 +45,12 @@ def run():
 
 
 
-
-def start_t(t):
-    while True:
-        t.run()
-        time.sleep(1)
-        cs = ev3.ColorSensor()
-        cs.mode = 'COL-COLOR'
-        print(str(cs.value()))
+    print("Hello World!")
+    c = Communication(client, logger)
+    c.planet = Planet()
+    c.connect()
+    c.listen('explorer/013')
+    c.disconnect()
 
 
 
