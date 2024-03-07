@@ -48,9 +48,8 @@ class Planet:
         :param weight: Integer
         :return: void
         """
+        self.paths[start[0][start[1]]] = {Tuple[target[0], target[1], weight]}
 
-        # YOUR CODE FOLLOWS (remove pass, please!)
-        pass
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def get_paths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
@@ -74,7 +73,9 @@ class Planet:
         """
 
         # YOUR CODE FOLLOWS (remove pass, please!)
-        pass
+        return self.paths
+
+
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[List[Tuple[Tuple[int, int], Direction]]]:
@@ -90,4 +91,13 @@ class Planet:
         """
 
         # YOUR CODE FOLLOWS (remove pass, please!)
-        pass
+        track = []
+        shortest_path = {}
+        vertices = set()
+        for node in self.paths:
+            vertices.add(Tuple[node[0], node[2]])
+
+        while len(vertices) > 0:
+            for node in vertices:
+                pass
+

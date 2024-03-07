@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import ev3dev.core
 import ev3dev.ev3 as ev3
 import logging
 import os
@@ -7,6 +7,7 @@ import paho.mqtt.client as mqtt
 import uuid
 import signal
 import time
+import threading
 
 from communication import Communication
 from odometry import Odometry
@@ -41,18 +42,18 @@ def run():
     # THE EXECUTION OF ALL CODE SHALL BE STARTED FROM WITHIN THIS FUNCTION.
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
 
-    print("Hello World!")
-    m = ev3.LargeMotor("outB")
-    m.reset()
-    m.stop_action = "brake"
-    m.speed_sp = 100
-    m.command = "run-forever"
-    time.sleep(3)
 
-    m.speed_sp = 200
-    m.command = "run-forever"
-    time.sleep(3)
-    m.stop()
+
+
+def start_t(t):
+    while True:
+        t.run()
+        time.sleep(1)
+        cs = ev3.ColorSensor()
+        cs.mode = 'COL-COLOR'
+        print(str(cs.value()))
+
+
 
 # DO NOT EDIT
 def signal_handler(sig=None, frame=None, raise_interrupt=True):
