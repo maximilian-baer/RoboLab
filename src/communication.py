@@ -4,6 +4,7 @@
 import json
 import paho.mqtt.client as mqtt
 import ssl
+from planet import Planet
 
 
 class Communication:
@@ -26,26 +27,56 @@ class Communication:
         self.client.on_message = self.safe_on_message_handler
         # Add your client setup here
         self.client.username_pw_set('013', password='F8mVbzVCC4')
-        self.connect()
         self.logger = logger
+        self.planet
+        self.expl = 'explorer/013'
         print('init communication...')
 
+    def explorationCompleted(self, message):
+        msg = self.create_msg({"from": "client", "type": "explorationCompleted", "payload": {"message": message}})
+        self.send_message(self.expl, msg)
+
+    def targetReached(self, message):
+        msg = self.create_msg({"from": "client", "type": "targetReached", "payload": {"message": message}})
+        self.send_message(self.expl, msg)
+
+    def ready(self):
+        msg = self.create_msg({"from": "client", "type": "ready", "payload": None})
+        self.send_message(self.expl, msg)
+
+    def testPlanet(self, planetName):
+        msg = self.create_msg({"from": "client", "type": "testPlanet", "payload": {"planetName": planetName}})
+        self.send_message(self.expl, msg)
+
     def connect(self):
+        """
+        connect client to broker
+        :return: void
+        """
         self.client.connect('mothership.inf.tu-dresden.de', port=8883)
+        self.client.connect('mothership.inf.tu-dresden.de', port=9002)
         print('connected to mothership.inf.tu ...')
 
     def disconnect(self):
+        """
+        disconnect client from broker
+        :return: void
+        """
         self.client.disconnect()
         print('disconnected from mothership.inf ...')
 
     def listen(self, topic):
+        """
+        listen into a specific channel
+        :param topic: String
+        :return: void
+        """
         self.client.loop_start()
         self.client.subscribe(topic, qos=2)
         while True:
             user_input = input('Enter disconnect to close the connection...\n')
             if user_input == 'disconnect':
                 break
-            # add code here
         self.client.loop_stop()
 
     # DO NOT EDIT THE METHOD SIGNATURE
@@ -78,10 +109,13 @@ class Communication:
 
         # YOUR CODE FOLLOWS (remove pass, please!)
         print('message to: ' + topic + ', message: ' + str(message))
-        out = {"from": "client", "type": "{}".format(message["type"])}
+        self.client.publish(topic, json.dumps(self.create_msg(message)), qos=2)
+
+    def create_msg(self, message):
+        msg = {"from": "{}".format(message[format("from")]), "type": "{}".format(message["type"])}
         if message["payload"] is not None:
-            out["payload"] = message["payload"]
-        self.client.publish(topic, json.dumps(out), qos=2)
+            msg["payload"] = message["payload"]
+        return msg
 
     # DO NOT EDIT THE METHOD SIGNATURE OR BODY
     #

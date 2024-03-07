@@ -44,7 +44,8 @@ def run():
 
     print("Hello World!")
     c = Communication(client, logger)
-    c.send_message("explorer/013", {"type": "ready", "payload": None})
+    c.planet = Planet()
+    c.connect()
     c.listen('explorer/013')
     c.disconnect()
 
