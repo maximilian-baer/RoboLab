@@ -1,15 +1,7 @@
 #!/usr/bin/env python3
 
 import ev3dev.ev3 as ev3
-import logging
-import os
-import paho.mqtt.client as mqtt
-import uuid
-import signal
-
-from communication import Communication
-from odometry import Odometry
-from planet import Direction, Planet
+import time
 
 client = None  # DO NOT EDIT
 
@@ -21,7 +13,7 @@ def run():
     # Your script isn't able to close the client after crashing.
     global client
 
-    client_id = 'YOURGROUPID-' + str(uuid.uuid4())  # Replace YOURGROUPID with your group ID
+    client_id = 013 + str(uuid.uuid4())  # Replace YOURGROUPID with your group ID
     client = mqtt.Client(client_id=client_id,  # Unique Client-ID to recognize our program
                          clean_session=True,  # We want a clean session after disconnect or abort/crash
                          protocol=mqtt.MQTTv311  # Define MQTT protocol version
@@ -41,6 +33,17 @@ def run():
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
 
     print("Hello World!")
+    m = ev3.LargeMotor("outA")
+    m.reset()
+    m.stop_action = "brake"
+    m.speed_sp = 100
+    m.command = "run-forever"
+    time.sleep(3)
+
+    m.speed_sp = 200
+    m.command = "run-forever"
+    time.sleep(3)
+    m.stop()
 
 
 # DO NOT EDIT
