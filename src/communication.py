@@ -32,19 +32,21 @@ class Communication:
 
     def connect(self):
         self.client.connect('mothership.inf.tu-dresden.de', port=8883)
+        print('connected to mothership.inf.tu ...')
 
     def disconnect(self):
         self.client.disconnect()
+        print('disconnected from mothership.inf ...')
 
-    def listen(self):
+    def listen(self, topic):
         self.client.loop_start()
+        self.client.subscribe(topic, qos=2)
         while True:
             user_input = input('Enter disconnect to close the connection...\n')
             if user_input == 'disconnect':
                 break
             # add code here
         self.client.loop_stop()
-        print("Connection closed, program ended!")
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def on_message(self, client, data, message):
@@ -57,9 +59,8 @@ class Communication:
         """
         payload = json.loads(message.payload.decode('utf-8'))
         self.logger.debug(json.dumps(payload, indent=2))
-
         # YOUR CODE FOLLOWS (remove pass, please!)
-        print('Got message with topic "{}":'.format(message.topic))
+        print('Got message with topic "{}":'.format(message.topic) + ' , data: {}'.format(data))
 
     # DO NOT EDIT THE METHOD SIGNATURE
     #
@@ -76,12 +77,11 @@ class Communication:
         self.logger.debug(json.dumps(message, indent=2))
 
         # YOUR CODE FOLLOWS (remove pass, please!)
-        self.client.subscribe(topic, qos=2)
-        out = {"type": "client", "from": "{}".format(message.topic)}
-        if message is not None:
-            out["payload"] = message.payload
-        self.client.publish(json.dumps(out))
-
+        print('message to: ' + topic + ', message: ' + str(message))
+        out = {"from": "client", "type": "{}".format(message["type"])}
+        if message["payload"] is not None:
+            out["payload"] = message["payload"]
+        self.client.publish(topic, json.dumps(out), qos=2)
 
     # DO NOT EDIT THE METHOD SIGNATURE OR BODY
     #

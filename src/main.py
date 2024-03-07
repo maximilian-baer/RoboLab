@@ -8,7 +8,6 @@ import paho.mqtt.client as mqtt
 import uuid
 import signal
 import time
-from tests import test_communication
 
 from communication import Communication
 from odometry import Odometry
@@ -45,7 +44,8 @@ def run():
 
     print("Hello World!")
     c = Communication(client, logger)
-    c.send_message("explorer/013")
+    c.send_message("explorer/013", {"type": "ready", "payload": None})
+    c.listen('explorer/013')
     c.disconnect()
 
 
