@@ -25,8 +25,26 @@ class Communication:
         self.client.tls_set(tls_version=ssl.PROTOCOL_TLS)
         self.client.on_message = self.safe_on_message_handler
         # Add your client setup here
-
+        self.client.username_pw_set('013', password='F8mVbzVCC4')
+        self.connect()
         self.logger = logger
+        print('init communication...')
+
+    def connect(self):
+        self.client.connect('mothership.inf.tu-dresden.de', port=8883)
+
+    def disconnect(self):
+        self.client.disconnect()
+
+    def listen(self):
+        self.client.loop_start()
+        while True:
+            user_input = input('Enter disconnect to close the connection...\n')
+            if user_input == 'disconnect':
+                break
+            # add code here
+        self.client.loop_stop()
+        print("Connection closed, program ended!")
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def on_message(self, client, data, message):
@@ -41,7 +59,7 @@ class Communication:
         self.logger.debug(json.dumps(payload, indent=2))
 
         # YOUR CODE FOLLOWS (remove pass, please!)
-        pass
+        print('Got message with topic "{}":'.format(message.topic))
 
     # DO NOT EDIT THE METHOD SIGNATURE
     #
@@ -58,7 +76,12 @@ class Communication:
         self.logger.debug(json.dumps(message, indent=2))
 
         # YOUR CODE FOLLOWS (remove pass, please!)
-        pass
+        self.client.subscribe(topic, qos=2)
+        out = {"type": "client", "from": "{}".format(message.topic)}
+        if message is not None:
+            out["payload"] = message.payload
+        self.client.publish(json.dumps(out))
+
 
     # DO NOT EDIT THE METHOD SIGNATURE OR BODY
     #

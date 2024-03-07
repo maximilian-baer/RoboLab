@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 
 import ev3dev.ev3 as ev3
 import logging
@@ -7,6 +8,7 @@ import paho.mqtt.client as mqtt
 import uuid
 import signal
 import time
+from tests import test_communication
 
 from communication import Communication
 from odometry import Odometry
@@ -42,17 +44,10 @@ def run():
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
 
     print("Hello World!")
-    m = ev3.LargeMotor("outB")
-    m.reset()
-    m.stop_action = "brake"
-    m.speed_sp = 100
-    m.command = "run-forever"
-    time.sleep(3)
+    c = Communication(client, logger)
+    c.send_message("explorer/013")
+    c.disconnect()
 
-    m.speed_sp = 200
-    m.command = "run-forever"
-    time.sleep(3)
-    m.stop()
 
 # DO NOT EDIT
 def signal_handler(sig=None, frame=None, raise_interrupt=True):
