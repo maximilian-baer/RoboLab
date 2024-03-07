@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-
+import ev3dev.core
+import json
 import ev3dev.ev3 as ev3
 
 import logging
@@ -8,6 +9,7 @@ import paho.mqtt.client as mqtt
 import uuid
 import signal
 import time
+import threading
 
 from communication import Communication
 from odometry import Odometry
@@ -42,6 +44,12 @@ def run():
 
     # THE EXECUTION OF ALL CODE SHALL BE STARTED FROM WITHIN THIS FUNCTION.
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
+    print("Hello World!")
+    comm = Communication(client, logger)
+    comm.planet = Planet()
+    comm.connect()
+    comm.listen('explorer/013')
+    comm.disconnect()
 
     print("Hello World!")
 
@@ -124,6 +132,10 @@ def moveOnLine():
 
         b.stop()
         c.stop()
+
+
+
+
 
 
 
