@@ -25,7 +25,6 @@ def run():
     # Your script isn't able to close the client after crashing.
     global client
 
-
     client_id = '013-' + str(uuid.uuid4())  # Replace YOURGROUPID with your group ID
     client = mqtt.Client(client_id=client_id,  # Unique Client-ID to recognize our program
                          clean_session=True,  # We want a clean session after disconnect or abort/crash
@@ -44,7 +43,6 @@ def run():
 
     # THE EXECUTION OF ALL CODE SHALL BE STARTED FROM WITHIN THIS FUNCTION.
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
-    print("Hello World!")
     comm = Communication(client, logger)
     comm.planet = Planet()
     comm.connect()
@@ -71,74 +69,67 @@ def run():
         print(cs.reflected_light_intensity)
         time.sleep(0.1)"""
 
-
     moveOnLine()
 
-def moveOnLine():
-        white = 74
-        black = 10
-        offset = 42
-        Kp = 5
-        Tp = 150
-        cs = ev3.ColorSensor()
-        cs.mode = 'COL-REFLECT'
-        us = ev3.UltrasonicSensor()
-        us.mode = 'US-DIST-CM'
 
-        b = ev3.LargeMotor("outB")
-        b.reset()
-        b.stop_action = "coast"
-        b.speed_sp = Tp
-        c = ev3.LargeMotor("outC")
-        c.reset()
-        c.stop_action = "coast"
-        c.speed_sp = Tp
-        b.command = "run-forever"
-        c.command = "run-forever"
-        i = 0
-        """while(us.value() > 100 and i < 20):
-            Lightvalue = cs.reflected_light_intensity
+def moveOnLine():
+    white = 74
+    black = 10
+    offset = 42
+    Kp = 5
+    Tp = 150
+    colorSensor = ev3.ColorSensor()
+    colorSensor.mode = 'COL-REFLECT'
+    ultrasonicSensor = ev3.UltrasonicSensor()
+    ultrasonicSensor.mode = 'US-DIST-CM'
+
+    outB = ev3.LargeMotor("outB")
+    outB.reset()
+    outB.stop_action = "coast"
+    outB.speed_sp = Tp
+    outC = ev3.LargeMotor("outC")
+    outC.reset()
+    outC.stop_action = "coast"
+    outC.speed_sp = Tp
+    outB.command = "run-forever"
+    outC.command = "run-forever"
+    i = 0
+    """while(ultrasonicSensor.value() > 100 and i < 20):
+            Lightvalue = colorSensor.reflected_light_intensity
             error = Lightvalue - offset
             Turn = Kp * error
             powe
             r_B = Tp - Turn
             power_C = Tp + Turn
-            b.speed_sp = power_B
+            outB.speed_sp = power_B
             c.speed_sp = power_C
-            #print(us.value())
+            #print(ultrasonicSensor.value())
             print(Lightvalue)
             #time.sleep(1)
             #i += 1"""
-        time.sleep(2)
-        b.stop()
-        b.speed_sp = 200
-        b.command = "run-forever"
-        c.stop()
-        c.speed_sp = 100
-        c.command = "run-forever"
-        time.sleep(2)
-        b.stop()
-        b.speed_sp = 150
-        b.command = "run-forever"
-        c.stop()
-        c.speed_sp = 150
-        c.command = "run-forever"
-        time.sleep(2)
-        b.speed_sp = 100
-        b.command = "run-forever"
-        c.speed_sp = 200
-        c.command = "run-forever"
-        time.sleep(2)
+    time.sleep(2)
+    outB.stop()
+    outB.speed_sp = 200
+    outB.command = "run-forever"
+    outC.stop()
+    outC.speed_sp = 100
+    outC.command = "run-forever"
+    time.sleep(2)
+    outB.stop()
+    outB.speed_sp = 150
+    outB.command = "run-forever"
+    outC.stop()
+    outC.speed_sp = 150
+    outC.command = "run-forever"
+    time.sleep(2)
+    outB.speed_sp = 100
+    outB.command = "run-forever"
+    outC.speed_sp = 200
+    outC.command = "run-forever"
+    time.sleep(2)
 
-        b.stop()
-        c.stop()
-
-
-
-
-
-
-
+    outB.stop()
+    outC.stop()
 
 
 # DO NOT EDIT
