@@ -101,3 +101,80 @@ class Planet:
             for node in vertices:
                 pass
 
+    def setPlanet(self, planetName, startX, startY, startOrientation):
+        """
+        sets the planet's name and startX, startY, startOrientation of the bot
+        :param planetName: String
+        :param startX: Int
+        :param startY: Int
+        :param startOrientation: Int
+        :return: void
+        """
+        print(planetName, startX, startY, startOrientation)
+        pass
+
+    def pathSelect(self, startDirection):
+        """
+        sets the direction of the next path of the bot
+        :param startDirection: Int
+        :return: void
+        """
+        print(startDirection)
+        pass
+
+    def pathCorrection(self, startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight):
+        """
+        sets the actual position of start and end nodes of the path taken by the bot -> path to be added to path list
+        :param startX: Int
+        :param startY: Int
+        :param startDirection: Int
+        :param endX: Int
+        :param endY: Int
+        :param endDirection: Int
+        :param pathStatus: "free|blocked"
+        :param pathWeight: Int
+        :return: void
+        """
+        print(startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight)
+        pass
+
+    def pathUnveiled(self, startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight):
+        """
+        adds new path found by the mothership
+        :param startX: Int
+        :param startY: Int
+        :param startDirection: Int
+        :param endX: Int
+        :param endY: Int
+        :param endDirection: Int
+        :param pathStatus: "free|blocked"
+        :param pathWeight: Int
+        :return: void
+        """
+        print(startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight)
+        pass
+
+    def addTarget(self, targetX, targetY):
+        """
+        adds new Target to Target-list
+        :param targetX: Int
+        :param targetY: Int
+        :return: void
+        """
+        print(targetX, targetY)
+        pass
+
+    def adjust(self, startX, startY, startDirection, endX, endY, endDirection):
+        """
+        dunno, just ignore ig
+        :param startX: Int
+        :param startY: Int
+        :param startDirection: Int
+        :param endX: Int
+        :param endY: Int
+        :param endDirection: Int
+        :return: void
+        """
+        print(startX, startY, startDirection, endX, endY, endDirection)
+        pass
+
