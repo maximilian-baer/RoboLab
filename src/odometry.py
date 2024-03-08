@@ -9,3 +9,9 @@ class Odometry:
 
         # YOUR CODE FOLLOWS (remove pass, please!)
         pass
+
+        #get rWheelDistances and lWheelDistances from Robot
+
+        #calculate each true distance and degree, add all
+
+        #approximate direction and coordinates of next node
