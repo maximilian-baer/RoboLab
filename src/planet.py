@@ -3,7 +3,7 @@
 # Attention: Do not import the ev3dev.ev3 module in this file
 from enum import IntEnum, unique
 from typing import Optional, List, Tuple, Dict
-
+import queue
 
 @unique
 class Direction(IntEnum):
@@ -34,6 +34,11 @@ class Planet:
     def __init__(self):
         """ Initializes the data structure """
         self.paths = {}
+        self.targets = queue.Queue()
+
+
+
+
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
@@ -48,7 +53,15 @@ class Planet:
         :param weight: Integer
         :return: void
         """
-        self.paths[start[0][start[1]]] = {Tuple[target[0], target[1], weight]}
+        if start[0] not in self.paths:
+            self.paths[start[0]] = {start[1]: (target[0], target[1], weight)}
+        else:
+            self.paths[start[0]][start[1]] = (target[0], target[1], weight)
+        if target[0] not in self.paths:
+            self.paths[target[0]] = {target[1]: (start[0], start[1], weight)}
+        else:
+            self.paths[target[0]] = {target[1]: (start[0], start[1], weight)}
+
 
 
     # DO NOT EDIT THE METHOD SIGNATURE
@@ -75,7 +88,12 @@ class Planet:
         # YOUR CODE FOLLOWS (remove pass, please!)
         return self.paths
 
+    def add_weight(self, path: List[Tuple[int, int]]) -> None:
+        pass
 
+
+    def next_target(self) -> Tuple[int, int]:
+        pass
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[List[Tuple[Tuple[int, int], Direction]]]:
