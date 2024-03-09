@@ -12,9 +12,9 @@ class Robot:
         self.lWheelDistances = []
 
         offset = (self.white + self.black) / 2
-        Kp = 2.2      # not calibrated
-        Kd = 5      # not calibrated
-        Tp = 200
+        Kp = 5      # not calibrated
+        Kd = 8      # not calibrated
+        Tp = 250
         lastError = 0
         colorSensor = ev3.ColorSensor()
         colorSensor.mode = 'RGB-RAW'
@@ -37,7 +37,7 @@ class Robot:
             error = Lightvalue - offset
             derivative = error - lastError
             Turn = Kp * error + Kd * derivative
-            print(Turn)
+
             power_B = Tp - Turn
             power_C = Tp + Turn
             if power_B < 0: power_B = 0
@@ -45,11 +45,13 @@ class Robot:
             """if abs(power_B - power_C) < 5:
                 power_B += 50
                 power_C += 50"""
-            outB.stop()
-            outC.stop()
+            outB.reset()
+            outC.reset()
+            outB.stop_action = "coast"
+            outC.stop_action = "coast"
             outB.speed_sp = power_B
             outC.speed_sp = power_C
-            print(power_C)
+
             outB.command = "run-forever"
             outC.command = "run-forever"
 
@@ -59,6 +61,7 @@ class Robot:
 
             self.rWheelDistances.append(0.48 * outC.position)       # in mm !!!
             self.lWheelDistances.append(0.48 * outB.position)       # all distances from the wheels in one line
+            time.sleep(0.01)
 
         outB.stop()
         outC.stop()

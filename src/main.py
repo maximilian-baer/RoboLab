@@ -53,6 +53,45 @@ def run():
 
     print("Hello World!")
 
+    #testing
+    robot = Robot()
+    robot.moveOnLine()
+    #print(robot.rWheelDistances)
+    goTiny()
+    odometry = Odometry(robot.lWheelDistances, robot.rWheelDistances, 0)
+    print(odometry.directionDifferenceOfLine())
+    print(odometry.coordinateDifferenceOfLine())
+
+    #go()
+
+def go():
+    m = ev3.LargeMotor("outB")
+    m.reset()
+    m.stop_action = "coast"
+    m.speed_sp = 200
+    n = ev3.LargeMotor("outC")
+    n.reset()
+    n.stop_action = "coast"
+    n.speed_sp = 200
+    n.command = "run-forever"
+    m.command = "run-forever"
+    time.sleep(10)
+    m.stop()
+    n.stop()
+def goTiny():
+    m = ev3.LargeMotor("outB")
+    m.reset()
+    m.stop_action = "coast"
+    m.speed_sp = 200
+    n = ev3.LargeMotor("outC")
+    n.reset()
+    n.stop_action = "coast"
+    n.speed_sp = 200
+    n.command = "run-forever"
+    m.command = "run-forever"
+    time.sleep(0.5)
+    m.stop()
+    n.stop()
 
 
 
