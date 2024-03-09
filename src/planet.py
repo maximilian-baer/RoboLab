@@ -34,11 +34,7 @@ class Planet:
     def __init__(self):
         """ Initializes the data structure """
         self.paths = {}
-        self.targets = queue.Queue()
-
-
-
-
+        self.targets = []
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
@@ -54,15 +50,34 @@ class Planet:
         :return: void
         """
         if start[0] not in self.paths:
-            self.paths[start[0]] = {start[1]: (target[0], target[1], weight)}
-        else:
-            self.paths[start[0]][start[1]] = (target[0], target[1], weight)
+            self.paths[start[0]] = {}
         if target[0] not in self.paths:
-            self.paths[target[0]] = {target[1]: (start[0], start[1], weight)}
-        else:
-            self.paths[target[0]] = {target[1]: (start[0], start[1], weight)}
+            self.paths[target[0]] = {}
+        self.paths[start[0]][start[1]] = (target[0], target[1], weight)
+        self.paths[target[0]][target[1]] = (start[0], start[1], weight)
 
+    def change_weight(self, v, direction, new_weight):
+        copy_target = self.paths[v][direction]
+        self.add_path(start=(v, direction), target=(copy_target[0], copy_target[1]), weight=new_weight)
 
+    # method for finding the closest vertex in Dijkstra-algorithm
+    def get_closest(self, vertices, distances):
+        v_min = None
+        # in case we pick a path that is blocked
+        for i in range(len(vertices)):
+            if distances[i] != -1:
+                v_min = distances[i]
+        # find minimum element amongst the paths without obstacle
+        for vertex in vertices:
+            if distances[vertex] != -1 and distances[vertex] < distances[v_min]:
+                v_min = vertex
+        return v_min
+
+    def receive_target(self, vertices, target):
+        if target not in self.paths:
+            self.paths[target] = {}
+
+        self.targets.append(target)
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def get_paths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
