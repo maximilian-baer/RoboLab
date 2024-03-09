@@ -35,6 +35,13 @@ class Planet:
         """ Initializes the data structure """
         self.paths = {}
         self.targets = []
+        self.position = []
+        self.prev_position = []
+
+    def change_position(self, x, y):
+        if len(self.position) == 2:
+            self.prev_position = self.prev_position
+        self.position = [x, y]
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
@@ -79,6 +86,7 @@ class Planet:
 
         self.targets.append(target)
 
+
     # DO NOT EDIT THE METHOD SIGNATURE
     def get_paths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
         """
@@ -103,12 +111,6 @@ class Planet:
         # YOUR CODE FOLLOWS (remove pass, please!)
         return self.paths
 
-    def add_weight(self, path: List[Tuple[int, int]]) -> None:
-        pass
-
-
-    def next_target(self) -> Tuple[int, int]:
-        pass
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[List[Tuple[Tuple[int, int], Direction]]]:
