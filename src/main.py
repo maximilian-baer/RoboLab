@@ -46,8 +46,12 @@ def run():
     comm = Communication(client, logger)
     comm.planet = Planet()
     comm.connect()
-    comm.listen('explorer/013')
+    comm.start_listen('explorer/013')
+    comm.message_ready('explorer/013')
+    comm.listen()
+    comm.stop_listen('explorer/013')
     comm.disconnect()
+
 # DO NOT EDIT
 def signal_handler(sig=None, frame=None, raise_interrupt=True):
     if client and client.is_connected():

@@ -26,30 +26,67 @@ class TestRoboLabCommunication(unittest.TestCase):
 
         # Initialize your data structure here
         self.communication = Communication(client, mock_logger)
+        self.syntaxTopic = 'comtest/013'
 
     def test_message_ready(self):
         """
         This test should check the syntax of the message type "ready"
         """
-        self.fail('implement me!')
+        try:
+            self.communication.connect()
+            self.communication.start_listen(self.syntaxTopic)
+            self.communication.message_ready(self.syntaxTopic)
+            self.communication.listen()
+            self.communication.stop_listen(self.syntaxTopic)
+            self.communication.disconnect()
+        except:
+            self.fail('error in message_ready')
 
     def test_message_path(self):
         """
         This test should check the syntax of the message type "path"
         """
-        self.fail('implement me!')
+        Xs = 0; Ys = 0; Ds = 0; Xe = 0; Ye = 0; De = 0; pathStatus = "free"
+        try:
+            self.communication.connect()
+            self.communication.start_listen(self.syntaxTopic)
+            self.communication.message_path(self.syntaxTopic, Xs, Ys, Ds, Xe, Ye, De, pathStatus)
+            self.communication.listen()
+            self.communication.stop_listen(self.syntaxTopic)
+            self.communication.disconnect()
+        except:
+            self.fail('error in message_path')
 
     def test_message_path_invalid(self):
         """
         This test should check the syntax of the message type "path" with errors/invalid data
         """
-        self.fail('implement me!')
+        Xs = -1000; Ys = -1000; Ds = -1000; Xe = -1000; Ye = -1000; De = -1000; pathStatus = "rndm_word"
+        try:
+            self.communication.connect()
+            self.communication.start_listen(self.syntaxTopic)
+            self.communication.message_path(self.syntaxTopic, Xs, Ys, Ds, Xe, Ye, De, pathStatus)
+            self.communication.listen()
+            self.communication.stop_listen(self.syntaxTopic)
+            self.communication.disconnect()
+        except:
+            self.fail('error with invalid message_path')
+
 
     def test_message_select(self):
         """
         This test should check the syntax of the message type "pathSelect"
         """
-        self.fail('implement me!')
+        Xs = 0; Ys = 0; Ds = 0
+        try:
+            self.communication.connect()
+            self.communication.start_listen(self.syntaxTopic)
+            self.communication.message_select(self.syntaxTopic, Xs, Ys, Ds)
+            self.communication.listen()
+            self.communication.stop_listen(self.syntaxTopic)
+            self.communication.disconnect()
+        except:
+            self.fail('error in message_select')
 
     def test_message_complete(self):
         """
