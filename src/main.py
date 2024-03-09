@@ -45,12 +45,19 @@ def run():
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
     comm = Communication(client, logger)
     comm.planet = Planet()
+    comm.first_communication()
+    #move to first node
+    #set curr & prev pos of Planet to start pos set by comm
     comm.connect()
     comm.start_listen('explorer/013')
-    comm.message_ready('explorer/013')
-    comm.listen()
-    comm.stop_listen('explorer/013')
-    comm.disconnect()
+    comm.start_listen(comm.planet_url(comm.planetName))                 #open first comm
+    while comm.end_exploration:
+        #calc next path
+        comm.node_comm_part_two(select='Next path to select')
+        #Robot gets next node from comm and goes there
+        #process data from the drive in odometry and send to Planet
+        comm.node_comm_part_one()   #send path msg and send result to Planet or end exploration
+        pass
 
 # DO NOT EDIT
 def signal_handler(sig=None, frame=None, raise_interrupt=True):

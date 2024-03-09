@@ -31,8 +31,48 @@ class Communication:
         self.planetName = None
         self.client.username_pw_set('013', password='F8mVbzVCC4')
         self.logger = logger
-        self.planet = Planet()
+        self.planet = None
+        self.expl = 'explorer/013'
+        self.end_exploration = False
         print('init communication...')
+
+    def first_communication(self):
+        """
+        communication to be held start of the exploration
+        :return: void
+        """
+        self.connect()
+        self.start_listen(self.expl)
+        self.message_test_planet(self.expl, input('Planet Name: '))
+        self.message_ready(self.expl)
+        self.listen()
+        self.stop_listen('explorer/013')
+        self.disconnect()
+    def node_comm_part_one(self):
+        """
+        communication to be held at each node part one
+        :return: void
+        """
+        self.connect()
+        self.start_listen('explorer/013')
+        self.start_listen(self.planet_url(self.planetName))
+        self.message_path()                         #send path taken (get from Planet Obj)
+        self.listen()                               #handle results
+
+    def node_comm_part_two(self, select):
+        """
+        communication to be held at each node part two
+        :param select: Dict with next node {"Xs": _, "Ys": _, "Ds": _}
+        :return: void
+        """
+        self.message_select(self.planet_url(self.planetName),
+                            select['Xs'],
+                            select['Ys'],
+                            select['Ds'])
+        self.listen()                                #handle results
+        self.stop_listen('explorer/013')
+        self.stop_listen(self.planet_url(self.planetName))
+        self.disconnect()
 
     def message_handler(self, message):
         """
@@ -52,8 +92,9 @@ class Communication:
                                       message["payload"]["startOrientation"])
             elif message["type"] == "done":
                 print('done - ' + message["payload"]["message"])
+                self.end_exploration = True
             elif message["type"] == "pathSelect":
-                self.planet.pathSelect(message["payload"]["startDirection"])
+                self.planet.pathSelect(message["payload"]["startDirection"])        #send to Robot!!!!!!!!!!!!!!!
             elif message["type"] == "path":
                 self.planet.pathCorrection(message["payload"]["startX"],
                                            message["payload"]["startY"],
