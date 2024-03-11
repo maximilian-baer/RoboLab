@@ -48,17 +48,24 @@ def run():
     # robot = Robot()
     odometry = Odometry()
     comm.planet = planet
-    comm.first_communication()
+    comm.first_communication()  # set planet and ready -> prev & curr pos in Planet
     print('move to first node'); time.sleep(3)
-    print('set curr & prev pos of Planet to start pos set by comm'); time.sleep(3)
     while not comm.end_exploration:
-        print('robot searches for next paths'); time.sleep(3)
-        print('calc next path by Planet (path algo)'); time.sleep(3)
-        comm.node_comm_part_two(select={'Xs': 0, 'Ys': 0, 'Ds': 0})
-                # send next path taken and handle results -> send to Planet
-        print('Robot gets next node from Planet (path algo) and goes there'); time.sleep(3)
+        print('robot searches for next paths -> send to Planet'); time.sleep(3)    # apply odometry after each movement!
+        print('calc next path by Planet (intelligent search)'); time.sleep(3)
+        comm.node_comm_part_two(select={'Xs': int(input('currX: ')),
+                                        'Ys': int(input('currY: ')),
+                                        'Ds': int(input('startDirection: '))})
+                # send next path wanted and handle results -> send to Planet
+        print('Robot gets next node from Planet (check if target available/server/else) and goes there'); time.sleep(3)
         print('process data from the drive in odometry'); time.sleep(3)
-        comm.node_comm_part_one(path={'Xs': 0, 'Ys': 0, 'Ds': 0, 'Xe': 0, 'Ye': 0, 'De': 0, 'pathStatus': 'free'})
+        comm.node_comm_part_one(path={'Xs': int(input('prevX: ')),
+                                      'Ys': int(input('prevY: ')),
+                                      'Ds': int(input('prevOrientation: ')),
+                                      'Xe': int(input('endX: ')),
+                                      'Ye': int(input('endY: ')),
+                                      'De': int(input('endOrientation: ')),
+                                      'pathStatus': input('pathStatus: ')})
                 # send path msg and send result to Planet or end exploration
         pass
     comm.end_communication()  # close communication

@@ -101,12 +101,14 @@ class Planet:
             for node in vertices:
                 pass
 
+
+
     def exploration_complete(self):
         """
         gets if exploration is complete
         :return: boolean
         """
-        if input('continue? (y/n) ') == 'n':
+        if input('exploration complete? (y/n) ') == 'y':
             return True
         return False
 
@@ -115,9 +117,11 @@ class Planet:
         gets if bot is on a target
         :return: boolean
         """
+        if input('Target reached? (y/n) ') == 'y':
+            return True
         return False
 
-    def setPlanet(self, planetName, startX, startY, startOrientation):
+    def set_planet(self, planetName, startX, startY, startOrientation):
         """
         sets the planet's name and startX, startY, startOrientation of the bot
         :param planetName: String
@@ -129,7 +133,7 @@ class Planet:
         print(planetName, startX, startY, startOrientation)
         pass
 
-    def pathSelect(self, startDirection):
+    def path_select(self, startDirection):
         """
         sets the direction of the next path of the bot
         :param startDirection: Int
@@ -138,7 +142,7 @@ class Planet:
         print(startDirection)
         pass
 
-    def pathCorrection(self, startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight):
+    def path_correction(self, startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight):
         """
         sets the actual position of start and end nodes of the path taken by the bot -> path to be added to path list
         :param startX: Int
@@ -154,7 +158,7 @@ class Planet:
         print(startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight)
         pass
 
-    def pathUnveiled(self, startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight):
+    def path_unveiled(self, startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight):
         """
         adds new path found by the mothership
         :param startX: Int
@@ -170,7 +174,7 @@ class Planet:
         print(startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight)
         pass
 
-    def addTarget(self, targetX, targetY):
+    def add_target(self, targetX, targetY):
         """
         adds new Target to Target-list
         :param targetX: Int

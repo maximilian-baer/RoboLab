@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# Attention: Do not import the ev3dev.ev3 module in this file
 import json
 import paho.mqtt.client as mqtt
 import ssl
@@ -42,11 +41,11 @@ class Communication:
         :return: void
         """
         self.connect()
-        self.start_listen(self.expl)
+        self.start_listen(self.expl)    # start connection part one
         self.message_test_planet(self.expl, input('Planet Name: '))  # send planet
         self.message_ready(self.expl)  # send ready for explore
         self.listen()  # handle results
-        self.start_listen(self.planet_url(self.planetName))
+        self.start_listen(self.planet_url(self.planetName))     # start connection part two
 
     def end_communication(self):
         """
@@ -55,7 +54,7 @@ class Communication:
         """
         self.disconnect()
         self.stop_listen(self.expl)
-        self.stop_listen(self.planet_url(self.planetName))
+        self.stop_listen(self.planet_url(self.planetName))      # end connection
 
     def node_comm_part_one(self, path):
         """
@@ -67,13 +66,14 @@ class Communication:
                           path['Xs'], path['Ys'], path['Ds'],
                           path['Xe'], path['Ye'], path['De'],
                           path['pathStatus'])  # send path taken
-        self.listen()   # handle results
+        self.listen()  # handle results
         if self.planet.on_target():
             self.message_target_reached(self.expl, 'Target reached Message')
+            self.end_exploration = True  # breaking condition
         elif self.planet.exploration_complete():
             self.message_exploration_completed(self.expl, 'Exploration complete Message')
-            self.end_exploration = True
-        self.listen()   # handle results
+            self.end_exploration = True     # breaking condition
+        self.listen()  # handle results
 
     def node_comm_part_two(self, select):
         """
@@ -84,7 +84,7 @@ class Communication:
         self.message_select(self.planet_url(self.planetName),
                             select['Xs'],
                             select['Ys'],
-                            select['Ds'])
+                            select['Ds'])  # send path wanting to take
         self.listen()  # handle results
 
     def message_handler(self, message):
@@ -98,36 +98,36 @@ class Communication:
 
         if message["from"] == "server":
             if message["type"] == "planet":
-                self.planet.setPlanet(message["payload"]["planetName"],
-                                      message["payload"]["startX"],
-                                      message["payload"]["startY"],
-                                      message["payload"]["startOrientation"])
+                self.planet.set_planet(message["payload"]["planetName"],
+                                       message["payload"]["startX"],
+                                       message["payload"]["startY"],
+                                       message["payload"]["startOrientation"])
             elif message["type"] == "done":
                 print('done - ' + message["payload"]["message"])
                 self.end_exploration = True
             elif message["type"] == "pathSelect":
-                self.planet.pathSelect(message["payload"]["startDirection"])  # send to Planet and eval!!!!!!!!!!!
+                self.planet.path_select(message["payload"]["startDirection"])  # send to Planet and eval!!!!!!!!!!!
             elif message["type"] == "path":
-                self.planet.pathCorrection(message["payload"]["startX"],
-                                           message["payload"]["startY"],
-                                           message["payload"]["startDirection"],
-                                           message["payload"]["endX"],
-                                           message["payload"]["endY"],
-                                           message["payload"]["endDirection"],
-                                           message["payload"]["pathStatus"],
-                                           message["payload"]["pathWeight"])
+                self.planet.path_correction(message["payload"]["startX"],
+                                            message["payload"]["startY"],
+                                            message["payload"]["startDirection"],
+                                            message["payload"]["endX"],
+                                            message["payload"]["endY"],
+                                            message["payload"]["endDirection"],
+                                            message["payload"]["pathStatus"],
+                                            message["payload"]["pathWeight"])
             elif message["type"] == "pathUnveiled":
-                self.planet.pathUnveiled(message["payload"]["startX"],
-                                         message["payload"]["startY"],
-                                         message["payload"]["startDirection"],
-                                         message["payload"]["endX"],
-                                         message["payload"]["endY"],
-                                         message["payload"]["endDirection"],
-                                         message["payload"]["pathStatus"],
-                                         message["payload"]["pathWeight"])
+                self.planet.path_unveiled(message["payload"]["startX"],
+                                          message["payload"]["startY"],
+                                          message["payload"]["startDirection"],
+                                          message["payload"]["endX"],
+                                          message["payload"]["endY"],
+                                          message["payload"]["endDirection"],
+                                          message["payload"]["pathStatus"],
+                                          message["payload"]["pathWeight"])
             elif message["type"] == "target":
-                self.planet.addTarget(message["payload"]["targetX"],
-                                      message["payload"]["targetY"])
+                self.planet.add_target(message["payload"]["targetX"],
+                                       message["payload"]["targetY"])
             else:
                 print("error while handling connection")
 
@@ -307,7 +307,7 @@ class Communication:
         self.logger.debug(json.dumps(message, indent=2))
 
         # YOUR CODE FOLLOWS (remove pass, please!)
-        #print('message to: ' + topic + ', message: ' + str(message))
+        # print('message to: ' + topic + ', message: ' + str(message))
         self.client.publish(topic, payload=self.create_msg(message), qos=2)
 
     def create_msg(self, message):
