@@ -38,11 +38,15 @@ class Planet:
         self.targets = []
         self.position = []
         self.prev_position = []
+        self.next_position = []
 
     def change_position(self, x, y):
         if len(self.position) == 2:
             self.prev_position = self.prev_position
         self.position = [x, y]
+
+    def discover_paths(self, v, direction):
+        self.paths[v][direction] = ((None, None), None, None)
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
@@ -70,7 +74,6 @@ class Planet:
 
     # method for finding the closest vertex in Dijkstra-algorithm
 
-
     # DO NOT EDIT THE METHOD SIGNATURE
     def get_paths(self) -> Dict[Tuple[int, int], Dict[Direction, Tuple[Tuple[int, int], Direction, Weight]]]:
         """
@@ -95,8 +98,11 @@ class Planet:
         # YOUR CODE FOLLOWS (remove pass, please!)
         return self.paths
 
-    def intelligent_search(self):
-        pass
+    def explore_closest_path(self, start, target):
+        track = self.shortest_path(start, target)
+        if track is None:
+            return
+
 
     @staticmethod
     def get_closest_vertex(vertices, distances):
@@ -121,15 +127,15 @@ class Planet:
             neighbours.append(neighbour)
         return neighbours
 
-    def receive_target(self, vertices, target):
+    def receive_target(self, target):
         if target not in self.paths:
             self.paths[target] = {}
 
         self.targets.append(target)
 
-
     # DO NOT EDIT THE METHOD SIGNATURE
-    def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[List[Tuple[Tuple[int, int], Direction]]]:
+    def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[
+        List[Tuple[Tuple[int, int], Direction]]]:
         """
         Returns a shortest path between two nodes
 
@@ -142,38 +148,47 @@ class Planet:
         """
 
         # YOUR CODE FOLLOWS (remove pass, please!)
+        # in case the vertex has to path yet
         if target not in self.paths or self.paths[target] == {}:
             return None
+        # variable for backtracking
         track = []
+        # dictionary for saving previous node for backtracking
         prev_node = {}
+        # set of remaining vertices
         vertices = set()
+        # initiate vertices
         c_paths = list(self.paths.keys())
         for i in range(len(self.paths)):
             vertices.add(c_paths[i])
+        # dictionary for corresponding weight values (infinite at the beginning)
         distances = {v: float('inf') for v in vertices}
         distances[start] = 0
+        # as long as there are not calculated vertices left
         while len(vertices) > 0:
             v = self.get_closest_vertex(vertices, distances)
+            # in case all remaining vertices are not reachable
             if distances[v] == float('inf'):
                 return None
+            # or the target is calculated (to prevent redundant operations)
             elif v == target:
                 break
             vertices.remove(v)
+            # foreach element next to v
             for w in self.get_neighbours(v, vertices):
+                # new costs being calculated
                 new_distance = distances[v] + w[1]
+                # if path via v is shorter than previous length of path
                 if new_distance < distances[w[0]]:
                     distances[w[0]] = new_distance
                     prev_node[w[0]] = v
         # backtracking
+        track.append(target)
         current_node = target
         while current_node != start:
-            for direction in self.paths[current_node]:
-                if self.paths[current_node][direction][0] == prev_node[current_node]:
-                    track.append((current_node, self.paths[current_node][direction][1], distances[current_node]))
+            for direction in self.paths[prev_node[current_node]]:
+                if self.paths[prev_node[current_node]][direction][0] == current_node:
+                    track.append((prev_node[current_node], direction))
             current_node = prev_node[current_node]
-        for direction in self.paths[start]:
-            if self.paths[start][direction][0] == track[len(track) - 1][0]:
-                track.append((start, direction))
         track.reverse()
         return track
-
