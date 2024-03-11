@@ -56,9 +56,18 @@ def run():
     #testing
     robot = Robot()
     robot.moveOnLine()
-    #print(robot.rWheelDistances)
-    goTiny()
+
+    """robot.rightTurn(90)
+    robot.moveOnLine()
+    robot.rightTurn(270)
+    robot.moveOnLine()
+    robot.moveOnLine()"""
+
     odometry = Odometry(robot.lWheelDistances, robot.rWheelDistances, 0)
+    #print(robot.rWheelDistances)
+    #goTiny()
+    #robot.moveStraight(3)
+    #odometry = Odometry(robot.testlWheel Distances, robot.testrWheelDistances, 0)
     print(odometry.directionDifferenceOfLine())
     print(odometry.coordinateDifferenceOfLine())
 
