@@ -44,20 +44,25 @@ def run():
     # THE EXECUTION OF ALL CODE SHALL BE STARTED FROM WITHIN THIS FUNCTION.
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
     comm = Communication(client, logger)
-    comm.planet = Planet()
+    planet = Planet()
+    # robot = Robot()
+    odometry = Odometry()
+    comm.planet = planet
     comm.first_communication()
-    #move to first node
-    #set curr & prev pos of Planet to start pos set by comm
-    comm.connect()
-    comm.start_listen('explorer/013')
-    comm.start_listen(comm.planet_url(comm.planetName))                 #open first comm
-    while comm.end_exploration:
-        #calc next path
-        comm.node_comm_part_two(select='Next path to select')
-        #Robot gets next node from comm and goes there
-        #process data from the drive in odometry and send to Planet
-        comm.node_comm_part_one()   #send path msg and send result to Planet or end exploration
+    print('move to first node'); time.sleep(3)
+    print('set curr & prev pos of Planet to start pos set by comm'); time.sleep(3)
+    while not comm.end_exploration:
+        print('robot searches for next paths'); time.sleep(3)
+        print('calc next path by Planet (path algo)'); time.sleep(3)
+        comm.node_comm_part_two(select={'Xs': 0, 'Ys': 0, 'Ds': 0})
+                # send next path taken and handle results -> send to Planet
+        print('Robot gets next node from Planet (path algo) and goes there'); time.sleep(3)
+        print('process data from the drive in odometry'); time.sleep(3)
+        comm.node_comm_part_one(path={'Xs': 0, 'Ys': 0, 'Ds': 0, 'Xe': 0, 'Ye': 0, 'De': 0, 'pathStatus': 'free'})
+                # send path msg and send result to Planet or end exploration
         pass
+    comm.end_communication()  # close communication
+
 
 # DO NOT EDIT
 def signal_handler(sig=None, frame=None, raise_interrupt=True):

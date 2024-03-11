@@ -101,6 +101,22 @@ class Planet:
             for node in vertices:
                 pass
 
+    def exploration_complete(self):
+        """
+        gets if exploration is complete
+        :return: boolean
+        """
+        if input('continue? (y/n) ') == 'n':
+            return True
+        return False
+
+    def on_target(self):
+        """
+        gets if bot is on a target
+        :return: boolean
+        """
+        return False
+
     def setPlanet(self, planetName, startX, startY, startOrientation):
         """
         sets the planet's name and startX, startY, startOrientation of the bot
