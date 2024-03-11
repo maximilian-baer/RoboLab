@@ -15,6 +15,7 @@ class Direction(IntEnum):
 
 
 Weight = int
+
 """
 Weight of a given path (received from the server)
 
@@ -68,23 +69,6 @@ class Planet:
         self.add_path(start=(v, direction), target=(copy_target[0], copy_target[1]), weight=new_weight)
 
     # method for finding the closest vertex in Dijkstra-algorithm
-    def get_closest(self, vertices, distances):
-        v_min = None
-        # in case we pick a path that is blocked
-        for i in range(len(vertices)):
-            if distances[i] != -1:
-                v_min = distances[i]
-        # find minimum element amongst the paths without obstacle
-        for vertex in vertices:
-            if distances[vertex] != -1 and distances[vertex] < distances[v_min]:
-                v_min = vertex
-        return v_min
-
-    def receive_target(self, vertices, target):
-        if target not in self.paths:
-            self.paths[target] = {}
-
-        self.targets.append(target)
 
 
     # DO NOT EDIT THE METHOD SIGNATURE
@@ -111,6 +95,36 @@ class Planet:
         # YOUR CODE FOLLOWS (remove pass, please!)
         return self.paths
 
+    @staticmethod
+    def get_closest_vertex(vertices, distances):
+        v_min = None
+        # in case we pick a path that is blocked
+        for v in vertices:
+            if distances[v] != -1:
+                v_min = v
+                break
+        # find minimum element amongst the paths without obstacle
+        for vertex in vertices:
+            if distances[vertex] != -1 and distances[vertex] < distances[v_min]:
+                v_min = vertex
+        return v_min
+
+    def get_neighbours(self, vertex):
+        neighbours = []
+        for direction in self.paths[vertex]:
+            distance = float('inf')
+            if self.paths[vertex][direction][2] != -1:
+                distance = self.paths[vertex][direction][2]
+            neighbour = (self.paths[vertex][direction][0], distance)
+            neighbours.append(neighbour)
+        return neighbours
+
+    def receive_target(self, vertices, target):
+        if target not in self.paths:
+            self.paths[target] = {}
+
+        self.targets.append(target)
+
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[List[Tuple[Tuple[int, int], Direction]]]:
@@ -126,13 +140,33 @@ class Planet:
         """
 
         # YOUR CODE FOLLOWS (remove pass, please!)
+        if target not in self.paths or self.paths[target] == {}:
+            return None
         track = []
-        shortest_path = {}
+        prev_node = {}
         vertices = set()
-        for node in self.paths:
-            vertices.add(Tuple[node[0], node[2]])
-
+        c_paths = list(self.paths.keys())
+        for i in range(len(self.paths)):
+            vertices.add(c_paths[i])
+        distances = {v: float('inf') for v in vertices}
+        distances[start] = 0
         while len(vertices) > 0:
-            for node in vertices:
-                pass
+            v = self.get_closest_vertex(vertices, distances)
+            if v == target:
+                break
+            elif distances[v] == float('inf'):
+                return None
+            vertices.remove(v)
+            for w in self.get_neighbours(v):
+                new_distance = distances[v] + w[1]
+                if new_distance < distances[w[0]]:
+                    distances[w[0]] = new_distance
+                    prev_node[w[0]] = v
+
+        current_node = target
+        while current_node != start:
+            track.append(current_node)
+            current_node = prev_node[current_node]
+        track.reverse()
+        return track
 
