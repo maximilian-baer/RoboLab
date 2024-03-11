@@ -95,23 +95,25 @@ class Planet:
         # YOUR CODE FOLLOWS (remove pass, please!)
         return self.paths
 
+    def intelligent_search(self):
+        pass
+
     @staticmethod
     def get_closest_vertex(vertices, distances):
-        v_min = None
-        # in case we pick a path that is blocked
-        for v in vertices:
-            if distances[v] != -1:
-                v_min = v
-                break
+        v_min = vertices.pop()
+        vertices.add(v_min)
+
         # find minimum element amongst the paths without obstacle
         for vertex in vertices:
-            if distances[vertex] != -1 and distances[vertex] < distances[v_min]:
+            if distances[vertex] < distances[v_min]:
                 v_min = vertex
         return v_min
 
-    def get_neighbours(self, vertex):
+    def get_neighbours(self, vertex, vertices):
         neighbours = []
         for direction in self.paths[vertex]:
+            if self.paths[vertex][direction][0] not in vertices:
+                continue
             distance = float('inf')
             if self.paths[vertex][direction][2] != -1:
                 distance = self.paths[vertex][direction][2]
@@ -152,21 +154,26 @@ class Planet:
         distances[start] = 0
         while len(vertices) > 0:
             v = self.get_closest_vertex(vertices, distances)
-            if v == target:
-                break
-            elif distances[v] == float('inf'):
+            if distances[v] == float('inf'):
                 return None
+            elif v == target:
+                break
             vertices.remove(v)
-            for w in self.get_neighbours(v):
+            for w in self.get_neighbours(v, vertices):
                 new_distance = distances[v] + w[1]
                 if new_distance < distances[w[0]]:
                     distances[w[0]] = new_distance
                     prev_node[w[0]] = v
-
+        # backtracking
         current_node = target
         while current_node != start:
-            track.append(current_node)
+            for direction in self.paths[current_node]:
+                if self.paths[current_node][direction][0] == prev_node[current_node]:
+                    track.append((current_node, self.paths[current_node][direction][1], distances[current_node]))
             current_node = prev_node[current_node]
+        for direction in self.paths[start]:
+            if self.paths[start][direction][0] == track[len(track) - 1][0]:
+                track.append((start, direction))
         track.reverse()
         return track
 
