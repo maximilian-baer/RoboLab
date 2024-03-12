@@ -52,33 +52,36 @@ class Planet:
         gets if exploration is complete
         :return: boolean
         """
-        if input('exploration complete? (y/n) ').lower() == 'y':
-            return True
-        '''
         if len(self.unexplored_paths) == 0:
-            return 
-        '''
+            return True
         return False
 
     def intelligent_search(self):
         if len(self.path_target) > 0:
             next_node = self.path_target.pop()
             self.change_position((next_node[0], next_node[1]))
-        elif self.is_path_selected:
-            pass
-        else:
+        elif not self.is_path_selected:
             if self.exploration_complete():
                 pass
             else:
+                #try:
                 v_min = self.unexplored_paths[0]
                 track = self.shortest_path((self.position[0][0], self.position[0][1]), v_min)
-                distance_min = track[len(track) - 1][2]
+                if track is not None:
+                    distance_min = track[len(track) - 1][2]
+                else:
+                    distance_min = 0
                 for path in self.unexplored_paths:
                     track = self.shortest_path(start=(self.position[0][0], self.position[0][1]), target=path[0])
-                    new_distance = track[len(track) - 1][2]
+                    if track is not None:
+                        new_distance = track[len(track) - 1][2]
+                    else:
+                        new_distance = 0
                     if distance_min < new_distance:
-                        v_min = [path, new_distance]
-                self.change_position(v_min[0][1])
+                        v_min = path
+                self.change_position(((self.position[0][0], self.position[0][1]), v_min[1]))
+                #except:
+                #    print('Planet.intelligent_search: error with unexplored paths ')
 
         self.is_path_selected = False
 
