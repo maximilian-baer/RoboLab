@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-# Attention: Do not import the ev3dev.ev3 module in this file
 import json
 import paho.mqtt.client as mqtt
 import ssl
+import time
 from planet import Planet
 
 
@@ -27,59 +27,114 @@ class Communication:
         self.client.tls_set(tls_version=ssl.PROTOCOL_TLS)
         self.client.on_message = self.safe_on_message_handler
         # Add your client setup here
+        self.received_msg = False
+        self.planetName = None
         self.client.username_pw_set('013', password='F8mVbzVCC4')
         self.logger = logger
-        self.planet = Planet()
+        self.planet = None
         self.expl = 'explorer/013'
+        self.end_exploration = False
         print('init communication...')
 
-    def message_handler(self, message):
+    def first_communication(self):
         """
-        handle response for on_message
-        :param message: String
+        communication to be held at start of the exploration
         :return: void
         """
-        #print('message: {}'.format(message))
-        #print('from: {}'.format(message["from"]))
+        self.connect()
+        self.start_listen(self.expl)    # start connection part one
+        self.message_test_planet(self.expl, input('Planet Name: '))  # send planet
+        self.message_ready(self.expl)  # send ready for explore
+        self.listen()  # handle results
+        self.start_listen(self.planet_url(self.planetName))     # start connection part two
 
-        #sorry für den hässlichen code, match case wollte igwie nicht und hatte keine lust das zu fixen :P
+    def end_communication(self):
+        """
+        end communication at end of the exploration
+        :return: void
+        """
+        self.disconnect()
+        self.stop_listen(self.expl)
+        self.stop_listen(self.planet_url(self.planetName))      # end connection
+
+    def path_and_result_handler(self, path: dict):
+        """
+        communication to be held at each node part one
+        :param path: Dict with path taken {"Xs": _, "Ys": _, "Ds": _, "Xe": _, "Ye": _, "De": _, "pathStatus": _}
+        :return: void
+        """
+        self.message_path(self.planet_url(self.planetName),
+                          path['Xs'], path['Ys'], path['Ds'],
+                          path['Xe'], path['Ye'], path['De'],
+                          path['pathStatus'])  # send path taken
+        self.listen()  # handle results
+        if self.planet.on_target():
+            self.message_target_reached(self.expl, 'Target reached Message')
+            self.end_exploration = True  # breaking condition
+        elif self.planet.exploration_complete():
+            self.message_exploration_completed(self.expl, 'Exploration complete Message')
+            self.end_exploration = True     # breaking condition
+        self.listen()  # handle results
+
+    def path_select_and_result_handler(self, select: dict):
+        """
+        communication to be held at each node part two
+        :param select: Dict with next node {"Xs": _, "Ys": _, "Ds": _}
+        :return: void
+        """
+        self.message_select(self.planet_url(self.planetName),
+                            select['Xs'],
+                            select['Ys'],
+                            select['Ds'])  # send path wanting to take
+        self.listen()  # handle results
+
+    def message_handler(self, message: dict):
+        """
+        handle response for on_message
+        :param message: {"from": String , "type": String , ?"payload": Dict}
+        :return: void
+        """
+        print('from {}:'.format(message["from"]))
+        print('got payload: ' + str(message.get("payload"))[1:-1] + ' , with type: {}'.format(message["type"]))
+
         if message["from"] == "server":
-            print(message["type"])
             if message["type"] == "planet":
-                self.planet.setPlanet(message["payload"]["planetName"],
-                                      message["payload"]["startX"],
-                                      message["payload"]["startY"],
-                                      message["payload"]["startOrientation"])
+                self.planetName = message["payload"]["planetName"]
+                self.planet.set_planet(message["payload"]["planetName"],
+                                       message["payload"]["startX"],
+                                       message["payload"]["startY"],
+                                       message["payload"]["startOrientation"])
             elif message["type"] == "done":
-                print(message["payload"]["message"])
+                print('done - ' + message["payload"]["message"])
+                self.end_exploration = True
             elif message["type"] == "pathSelect":
-                self.planet.pathSelect(message["payload"]["startDirection"])
+                self.planet.path_select(message["payload"]["startDirection"])  # send to Planet and eval!!!!!!!!!!!
             elif message["type"] == "path":
-                self.planet.pathCorrection(message["payload"]["startX"],
-                                           message["payload"]["startY"],
-                                           message["payload"]["startDirection"],
-                                           message["payload"]["endX"],
-                                           message["payload"]["endY"],
-                                           message["payload"]["endDirection"],
-                                           message["payload"]["pathStatus"],
-                                           message["payload"]["pathWeight"])
+                self.planet.path_correction(message["payload"]["startX"],
+                                            message["payload"]["startY"],
+                                            message["payload"]["startDirection"],
+                                            message["payload"]["endX"],
+                                            message["payload"]["endY"],
+                                            message["payload"]["endDirection"],
+                                            message["payload"]["pathStatus"],
+                                            message["payload"]["pathWeight"])
             elif message["type"] == "pathUnveiled":
-                self.planet.pathUnveiled(message["payload"]["startX"],
-                                         message["payload"]["startY"],
-                                         message["payload"]["startDirection"],
-                                         message["payload"]["endX"],
-                                         message["payload"]["endY"],
-                                         message["payload"]["endDirection"],
-                                         message["payload"]["pathStatus"],
-                                         message["payload"]["pathWeight"])
+                self.planet.path_unveiled(message["payload"]["startX"],
+                                          message["payload"]["startY"],
+                                          message["payload"]["startDirection"],
+                                          message["payload"]["endX"],
+                                          message["payload"]["endY"],
+                                          message["payload"]["endDirection"],
+                                          message["payload"]["pathStatus"],
+                                          message["payload"]["pathWeight"])
             elif message["type"] == "target":
-                self.planet.addTarget(message["payload"]["targetX"],
-                                      message["payload"]["targetY"])
+                self.planet.add_target(message["payload"]["targetX"],
+                                       message["payload"]["targetY"])
             else:
-                print("error while handling connection")
+                print("Communication.message_handler: error while receiving message")
 
         elif message["from"] == "debug":
-            #print(message['type'])
+            # print(message['type'])
             if message['type'] == "adjust":
                 self.planet.adjust(message["payload"]["startX"],
                                    message["payload"]["startY"],
@@ -90,43 +145,49 @@ class Communication:
             else:
                 print('debug: {}'.format(message["payload"]))
 
-    def explorationCompleted(self, message):
+    def message_exploration_completed(self, topic: str, message: str):
         """
-        send explorationCompleted msg with message
-        :param message: String
+        publish explorationCompleted msg with message to topic
+        :param message: explorationCompleted msg
+        :param topic: 'explorer/013' | planetURL(...)
         :return: void
         """
         msg = {"from": "client", "type": "explorationCompleted", "payload": {"message": message}}
-        self.send_message(self.expl, msg)
+        self.send_message(topic, msg)
 
-    def pathSelect(self, Xs, Ys, Ds):
+    def message_select(self, topic: str, startX: int, startY: int, startDirection: int):
         """
-        send pathSelect msg with start parameters
-        :param Xs: Int
-        :param Ys: Int
-        :param Ds: Int
+        publish pathSelect msg with start parameters to topic
+        :param topic: 'explorer/013' | planetURL(...)
+        :param startX: Int
+        :param startY: Int
+        :param startDirection: Int
         :return: void
         """
-        msg = {"from": "client", "type": "pathSelect", "payload": {"Xs": Xs, "Ys": Ys, "startDirection": Ds}}
-        self.send_message(self.planetURL(self.planetName), msg)
+        msg = {"from": "client", "type": "pathSelect", "payload": {"startX": startX,
+                                                                   "startY": startY,
+                                                                   "startDirection": startDirection}}
+        self.send_message(topic, msg)
 
-    def path(self, Xs, Ys, Ds, Xe, Ye, De, pathStatus):
+    def message_path(self, topic: str, Xs: int, Ys: int, Ds: int, Xe: int, Ye: int, De: int, pathStatus: str):
         """
-        send path msg with start and end points
-        :param Xs: Int
-        :param Ys: Int
-        :param Ds: Int
-        :param Xe: Int
-        :param Ye: Int
-        :param De: Int
+        publish path msg with start and end points to topic
+        :param topic: 'explorer/013' | planetURL(...)
+        :param Xs: startX
+        :param Ys: startY
+        :param Ds: startDirection
+        :param Xe: endX
+        :param Ye: endY
+        :param De: endDirection
+        :param pathStatus: "free | blocked"
         :return: void
         """
-        msg = {"from": "client", "type": "path", "payload": {"Xs": Xs, "Ys": Ys, "startDirection": Ds,
+        msg = {"from": "client", "type": "path", "payload": {"startX": Xs, "startY": Ys, "startDirection": Ds,
                                                              "endX": Xe, "endY": Ye, "endDirection": De,
                                                              "pathStatus": pathStatus}}
-        self.send_message(self.planetURL(self.planetName), msg)
+        self.send_message(topic, msg)
 
-    def planetURL(self, planetName):
+    def planet_url(self, planetName: str):
         """
         return planetURL based on planetName
         :param planetName: String
@@ -134,63 +195,100 @@ class Communication:
         """
         return "planet/{}/013".format(planetName)
 
-    def targetReached(self, message):
+    def message_target_reached(self, topic: str, message: str):
         """
-        send targetReached msg with message
+        publish targetReached msg with message to topic
+        :param topic: 'explorer/013' | planetURL(...)
         :param message: String
         :return: void
         """
         msg = {"from": "client", "type": "targetReached", "payload": {"message": message}}
-        self.send_message(self.expl, msg)
+        self.send_message(topic, msg)
 
-    def ready(self):
+    def message_ready(self, topic: str):
         """
-        send ready msg
+        publish ready msg to topic
+        :param topic: 'explorer/013' | planetURL(...)
         :return: void
         """
         msg = {"from": "client", "type": "ready", "payload": None}
-        self.send_message(self.expl, msg)
+        self.send_message(topic, msg)
 
-    def testPlanet(self, planetName):
+    def message_test_planet(self, topic: str, planet_name: str):
         """
-        send testPlanet msg with planetName and set planetName
-        :param planetName: String
+        publish testPlanet msg with planetName to topic and set internal planetName
+        :param topic: 'explorer/013' | planetURL(...)
+        :param planet_name: String
         :return: void
         """
-        self.planetName = planetName
-        msg = {"from": "client", "type": "testPlanet", "payload": {"planetName": planetName}}
-        self.send_message(self.expl, msg)
+        msg = {"from": "client", "type": "testPlanet", "payload": {"planetName": planet_name}}
+        self.send_message(topic, msg)
 
     def connect(self):
         """
         connect client to broker
         :return: void
         """
-        self.client.connect('mothership.inf.tu-dresden.de', port=8883)
-        print('connected to mothership.inf.tu ...')
+        try:
+            self.client.connect('mothership.inf.tu-dresden.de', port=8883)
+            print('connected to mothership.inf.tu ...')
+        except:
+            print('Communication.connect: could not connect to mothership.inf')
 
     def disconnect(self):
         """
         disconnect client from broker
         :return: void
         """
-        self.client.disconnect()
-        print('disconnected from mothership.inf ...')
+        try:
+            self.client.disconnect()
+            print('disconnected from mothership.inf ...')
+        except:
+            print('Communication.disconnect: could not connect to mothership.inf')
 
-    def listen(self, topic):
+    def start_listen(self, topic: str):
         """
-        listen into a specific channel
+        start listening into a specific channel
         :param topic: String
         :return: void
         """
-        self.client.loop_start()
-        self.client.subscribe(topic, qos=2)
+        try:
+            print('start listening on topic: {}...'.format(topic))
+            self.client.loop_start()
+            self.client.subscribe(topic, qos=2)
+        except:
+            print('Communication.start_listen: could not start listening on topic: {}...'.format(topic))
+
+    def stop_listen(self, topic: str):
+        """
+        stop listening into a specific channel
+        :param topic: String
+        :return: void
+        """
+        try:
+            print('stop listening on topic: {}...'.format(topic))
+            self.client.loop_stop()
+            self.client.unsubscribe(topic)
+        except:
+            print('Communication.stop_listen: could not stop listening on topic: {}...'.format(topic))
+
+    def listen(self):
+        """
+        listen loop
+        :return: void
+        """
+        timeout = 0
         while True:
-            self.testPlanet("moin")
-            user_input = input('Enter disconnect to close the connection...\n')
-            if user_input == 'disconnect':
+            user_input = None
+            # user_input = input('Enter disconnect to close the connection...\n')
+            time.sleep(3)
+            timeout += 1
+            if user_input == 'disconnect' or not self.received_msg:
                 break
-        self.client.loop_stop()
+            self.received_msg = False
+            if timeout > 10:
+                print('listener timed out...')
+                break
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def on_message(self, client, data, message):
@@ -204,7 +302,8 @@ class Communication:
         payload = json.loads(message.payload.decode('utf-8'))
         self.logger.debug(json.dumps(payload, indent=2))
         # YOUR CODE FOLLOWS (remove pass, please!)
-        #print('Got message with topic "{}":'.format(message.topic) + ' , data: {}'.format(data))
+        # print('Got message with topic "{}":'.format(message.topic) + ' , data: {}'.format(data))
+        self.received_msg = True
         self.message_handler(payload)
 
     # DO NOT EDIT THE METHOD SIGNATURE
@@ -222,19 +321,36 @@ class Communication:
         self.logger.debug(json.dumps(message, indent=2))
 
         # YOUR CODE FOLLOWS (remove pass, please!)
-        print('message to: ' + topic + ', message: ' + str(message))
-        self.client.publish(topic, payload=self.create_msg(message), qos=2)
+        # print('message to: ' + topic + ', message: ' + str(message))
+        try:
+            self.client.publish(topic, payload=self.create_msg(message), qos=2)
+        except:
+            print('Communication.send_message: Error sending message')
 
-    def create_msg(self, message):
-        msg = "{"
-        msg = msg + '''"from":"{}", "type":"{}"'''.format(message[format("from")], message["type"])
-        if message["payload"] is not None:
-            msg = msg + ', "payload":{'
-            for keys in message["payload"]:
-                msg = msg + '''"{}": "{}"'''.format(keys, message["payload"][keys])
-            msg = msg + "}"
-        msg = msg + "}"
-        return msg
+    def create_msg(self, message: dict):
+        """
+        create JSON like message for sending to mothership
+        :param message: Dict {"from": String, "type": String, "payload": Dict}
+        :return: String
+        """
+        try:
+            msg = "{"
+            msg += '''"from":"{}", "type":"{}"'''.format(message[format("from")], message["type"])
+            if message["payload"] is not None:
+                msg += ', "payload":{'
+                for keys in message["payload"]:
+                    msg += '''"{}":'''.format(keys)
+                    if type(message["payload"][keys]) is int:
+                        msg += '''{}, '''.format(message["payload"][keys])
+                    else:
+                        msg += '''"{}", '''.format(message["payload"][keys])
+                msg = msg[0:(len(msg) - 2)]
+                msg += "}"
+            msg += "}"
+            return msg
+        except:
+            print('Communication.create_msg: Error creating payload')
+            return '''{"from": "debug","type": "error","payload": {"message": "payload is not valid"}}'''
 
     # DO NOT EDIT THE METHOD SIGNATURE OR BODY
     #
