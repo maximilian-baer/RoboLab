@@ -52,31 +52,36 @@ class Planet:
         gets if exploration is complete
         :return: boolean
         """
-        if input('exploration complete? (y/n) ').lower() == 'y':
-            return True
-        '''
         if len(self.unexplored_paths) == 0:
-            return 
-        '''
+            return True
         return False
 
     def intelligent_search(self):
         if len(self.path_target) > 0:
             next_node = self.path_target.pop()
             self.change_position((next_node[0], next_node[1]))
-        elif self.is_path_selected:
-            pass
-        else:
+        elif not self.is_path_selected:
             if self.exploration_complete():
                 pass
             else:
-                copy_path = self.unexplored_paths[0]
-                v_min = [self.paths[copy_path[0]][copy_path[1]], self.shortest_path(start=(self.position[0][0], self.position[0][1]), target=copy_path)[1]]
+                #try:
+                v_min = self.unexplored_paths[0]
+                track = self.shortest_path((self.position[0][0], self.position[0][1]), v_min)
+                if track is not None:
+                    distance_min = track[len(track) - 1][2]
+                else:
+                    distance_min = 0
                 for path in self.unexplored_paths:
-                    new_distance = self.shortest_path((self.position[0][0], self.position[0][1]), path[0])[1]
-                    if v_min[1] < new_distance:
-                        v_min = [path, new_distance]
-                self.change_position(v_min[0][1])
+                    track = self.shortest_path(start=(self.position[0][0], self.position[0][1]), target=path[0])
+                    if track is not None:
+                        new_distance = track[len(track) - 1][2]
+                    else:
+                        new_distance = 0
+                    if distance_min < new_distance:
+                        v_min = path
+                self.change_position(((self.position[0][0], self.position[0][1]), v_min[1]))
+                #except:
+                #    print('Planet.intelligent_search: error with unexplored paths ')
 
         self.is_path_selected = False
 
@@ -317,7 +322,7 @@ class Planet:
                     distances[w[0]] = new_distance
                     prev_node[w[0]] = v
         # backtracking
-        track.append((target, distances[target]))
+        track.append((target, None, distances[target]))
         current_node = target
         while current_node != start:
             for direction in self.paths[prev_node[current_node]]:
