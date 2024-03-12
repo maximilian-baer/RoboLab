@@ -52,8 +52,12 @@ class Planet:
         gets if exploration is complete
         :return: boolean
         """
-        if len(self.unexplored_paths) == 0:
+        if input('exploration complete? (y/n) ').lower() == 'y':
             return True
+        '''
+        if len(self.unexplored_paths) == 0:
+            return 
+        '''
         return False
 
     def intelligent_search(self):
