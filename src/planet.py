@@ -40,13 +40,6 @@ class Planet:
         self.position = []
         self.prev_position = []
 
-    def exploration_complete(self) -> bool:
-        """
-        gets if exploration is complete
-        :return: boolean
-        """
-        pass
-
     def change_position(self, start: Tuple[Tuple[int, int], Direction]):
         self.prev_position = self.prev_position
         self.position = [list(start[0]), Direction]

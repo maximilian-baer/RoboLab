@@ -50,6 +50,7 @@ def run():
     comm.planet = planet
     comm.first_communication()  # set planet and ready -> prev & curr pos in Planet
     print('move to first node'); time.sleep(3)
+    print('robot searches for next paths -> send to Planet'); time.sleep(3)
     while not comm.end_exploration:
         print('calc next path by Planet (intelligent search)'); time.sleep(3)
         comm.path_select_and_result_handler(select={'Xs': int(input('currX: ')),
