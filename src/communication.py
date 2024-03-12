@@ -56,7 +56,7 @@ class Communication:
         self.stop_listen(self.expl)
         self.stop_listen(self.planet_url(self.planetName))      # end connection
 
-    def node_comm_part_one(self, path):
+    def path_and_result_handler(self, path):
         """
         communication to be held at each node part one
         :param path: Dict with path taken {"Xs": _, "Ys": _, "Ds": _, "Xe": _, "Ye": _, "De": _, "pathStatus": _}
@@ -75,7 +75,7 @@ class Communication:
             self.end_exploration = True     # breaking condition
         self.listen()  # handle results
 
-    def node_comm_part_two(self, select):
+    def path_select_and_result_handler(self, select):
         """
         communication to be held at each node part two
         :param select: Dict with next node {"Xs": _, "Ys": _, "Ds": _}
@@ -98,6 +98,7 @@ class Communication:
 
         if message["from"] == "server":
             if message["type"] == "planet":
+                self.planetName = message["payload"]["planetName"]
                 self.planet.set_planet(message["payload"]["planetName"],
                                        message["payload"]["startX"],
                                        message["payload"]["startY"],
@@ -129,7 +130,7 @@ class Communication:
                 self.planet.add_target(message["payload"]["targetX"],
                                        message["payload"]["targetY"])
             else:
-                print("error while handling connection")
+                print("Communication.message_handler: error while receiving message")
 
         elif message["from"] == "debug":
             # print(message['type'])
@@ -218,7 +219,6 @@ class Communication:
         :param planet_name: String
         :return: void
         """
-        self.planetName = planet_name
         msg = {"from": "client", "type": "testPlanet", "payload": {"planetName": planet_name}}
         self.send_message(topic, msg)
 
@@ -227,16 +227,22 @@ class Communication:
         connect client to broker
         :return: void
         """
-        self.client.connect('mothership.inf.tu-dresden.de', port=8883)
-        print('connected to mothership.inf.tu ...')
+        try:
+            self.client.connect('mothership.inf.tu-dresden.de', port=8883)
+            print('connected to mothership.inf.tu ...')
+        except:
+            print('Communication.connect: could not connect to mothership.inf')
 
     def disconnect(self):
         """
         disconnect client from broker
         :return: void
         """
-        self.client.disconnect()
-        print('disconnected from mothership.inf ...')
+        try:
+            self.client.disconnect()
+            print('disconnected from mothership.inf ...')
+        except:
+            print('Communication.disconnect: could not connect to mothership.inf')
 
     def start_listen(self, topic):
         """
@@ -244,9 +250,12 @@ class Communication:
         :param topic: String
         :return: void
         """
-        print('start listening on topic: {}...'.format(topic))
-        self.client.loop_start()
-        self.client.subscribe(topic, qos=2)
+        try:
+            print('start listening on topic: {}...'.format(topic))
+            self.client.loop_start()
+            self.client.subscribe(topic, qos=2)
+        except:
+            print('Communication.start_listen: could not start listening on topic: {}...'.format(topic))
 
     def stop_listen(self, topic):
         """
@@ -254,9 +263,12 @@ class Communication:
         :param topic: String
         :return: void
         """
-        print('stop listening on topic: {}...'.format(topic))
-        self.client.loop_stop()
-        self.client.unsubscribe(topic)
+        try:
+            print('stop listening on topic: {}...'.format(topic))
+            self.client.loop_stop()
+            self.client.unsubscribe(topic)
+        except:
+            print('Communication.stop_listen: could not stop listening on topic: {}...'.format(topic))
 
     def listen(self):
         """
@@ -308,23 +320,30 @@ class Communication:
 
         # YOUR CODE FOLLOWS (remove pass, please!)
         # print('message to: ' + topic + ', message: ' + str(message))
-        self.client.publish(topic, payload=self.create_msg(message), qos=2)
+        try:
+            self.client.publish(topic, payload=self.create_msg(message), qos=2)
+        except:
+            print('Communication.send_message: Error sending message')
 
     def create_msg(self, message):
-        msg = "{"
-        msg += '''"from":"{}", "type":"{}"'''.format(message[format("from")], message["type"])
-        if message["payload"] is not None:
-            msg += ', "payload":{'
-            for keys in message["payload"]:
-                msg += '''"{}":'''.format(keys)
-                if type(message["payload"][keys]) is int:
-                    msg += '''{}, '''.format(message["payload"][keys])
-                else:
-                    msg += '''"{}", '''.format(message["payload"][keys])
-            msg = msg[0:(len(msg) - 2)]
+        try:
+            msg = "{"
+            msg += '''"from":"{}", "type":"{}"'''.format(message[format("from")], message["type"])
+            if message["payload"] is not None:
+                msg += ', "payload":{'
+                for keys in message["payload"]:
+                    msg += '''"{}":'''.format(keys)
+                    if type(message["payload"][keys]) is int:
+                        msg += '''{}, '''.format(message["payload"][keys])
+                    else:
+                        msg += '''"{}", '''.format(message["payload"][keys])
+                msg = msg[0:(len(msg) - 2)]
+                msg += "}"
             msg += "}"
-        msg += "}"
-        return msg
+            return msg
+        except:
+            print('Communication.create_msg: Error creating payload')
+            return '''{"from": "debug","type": "error","payload": {"message": "payload is not valid"}}'''
 
     # DO NOT EDIT THE METHOD SIGNATURE OR BODY
     #

@@ -51,15 +51,15 @@ def run():
     comm.first_communication()  # set planet and ready -> prev & curr pos in Planet
     print('move to first node'); time.sleep(3)
     while not comm.end_exploration:
-        print('robot searches for next paths -> send to Planet'); time.sleep(3)    # apply odometry after each movement!
         print('calc next path by Planet (intelligent search)'); time.sleep(3)
-        comm.node_comm_part_two(select={'Xs': int(input('currX: ')),
+        comm.path_select_and_result_handler(select={'Xs': int(input('currX: ')),
                                         'Ys': int(input('currY: ')),
                                         'Ds': int(input('startDirection: '))})
                 # send next path wanted and handle results -> send to Planet
-        print('Robot gets next node from Planet (check if target available/server/else) and goes there'); time.sleep(3)
+        print('Robot gets next path from Planet (check if target available/server/else) and goes there'); time.sleep(3)
         print('process data from the drive in odometry'); time.sleep(3)
-        comm.node_comm_part_one(path={'Xs': int(input('prevX: ')),
+        print('robot searches for next paths -> send to Planet'); time.sleep(3)    # apply odometry after each movement!
+        comm.path_and_result_handler(path={'Xs': int(input('prevX: ')),
                                       'Ys': int(input('prevY: ')),
                                       'Ds': int(input('prevOrientation: ')),
                                       'Xe': int(input('endX: ')),
