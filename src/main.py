@@ -70,7 +70,6 @@ def run():
         pass
     comm.end_communication()  # close communication
 
-
 # DO NOT EDIT
 def signal_handler(sig=None, frame=None, raise_interrupt=True):
     if client and client.is_connected():

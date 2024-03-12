@@ -22,7 +22,6 @@ class Communication:
         :param logger: logging.Logger
         """
         # DO NOT CHANGE THE SETUP HERE
-        self.planetName = None
         self.client = mqtt_client
         self.client.tls_set(tls_version=ssl.PROTOCOL_TLS)
         self.client.on_message = self.safe_on_message_handler
@@ -96,7 +95,6 @@ class Communication:
         """
         print('from {}:'.format(message["from"]))
         print('got payload: ' + str(message.get("payload"))[1:-1] + ' , with type: {}'.format(message["type"]))
-
         if message["from"] == "server":
             if message["type"] == "planet":
                 self.planetName = message["payload"]["planetName"]
