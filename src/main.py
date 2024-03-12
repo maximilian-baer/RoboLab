@@ -56,30 +56,17 @@ def run():
     #testing
     move = Movement()
 
-    """move.rightTurn(90)
-    
-    move.rightTurn(270)
     move.moveOnLine()
-    move.moveOnLine()"""
+    odometry1 = Odometry(move.lWheelDistances, move.rWheelDistances, 90,0,0)
+    print(odometry1.directionDifferenceOfLine())
+    print(odometry1.coordinateDifferenceOfLine())
+    print(odometry1.currentDirection())
+    print(odometry1.currentCoordinates())
+        # Ydiff negative?
 
-    """move.rightTurn(180)
-    odometry = Odometry(move.lWheelDistances, move.rWheelDistances, 0,0,0)
-    print(odometry.directionDifferenceOfLine())
-    print(odometry.coordinateDifferenceOfLine())
-    print(odometry.currentDirection())
-    print(odometry.currentCoordinates())
-    move.rightTurn(270)
-    odometry = Odometry(move.lWheelDistances, move.rWheelDistances, 0, 0, 0)
-    print(odometry.directionDifferenceOfLine())
-    print(odometry.coordinateDifferenceOfLine())
-    print(odometry.currentDirection())
-    print(odometry.currentCoordinates())"""
+    "move.findPathsOdometry(270)"
 
-    move.moveOnLine()
-
-    move.findPathsOdometry(0)
-
-
+    """print(move.currentBrightness())"""
 
 
 # DO NOT EDIT

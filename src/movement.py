@@ -6,7 +6,7 @@ dpt = 0.48      # distance per tick
 
 class Movement:
     def __init__(self):
-        self.white = 67.5  # (245, 465, 465)
+        self.white = 50 #67.5  # (245, 465, 465)
         self.black = 1.5  # (30, 75, 75)
         self.rWheelDistances = []
         self.lWheelDistances = []
@@ -21,9 +21,9 @@ class Movement:
         self.lWheelDistances = []
 
         offset = (self.white + self.black) / 2
-        Kp = 2      # calibrated
+        Kp = 3      # calibrated
         Ki = 0.05               # (for now)
-        Kd = 3      # calibrated
+        Kd = 4      # calibrated
         Tp = 180
         lastError = 0
         integral = 0
@@ -85,11 +85,11 @@ class Movement:
 
         if ultrasonicSensor.value() < 150:
             self.status = "blocked"
-            self.rightTurn(180)
+            self.rightTurn(190)
             self.moveOnLine()
         else:
             # an Kreuzung angekommen
-            self.moveStraight(0.45)
+            self.moveStraight(0.5)
 
     def rightTurn(self, degree):
         outB = ev3.LargeMotor("outB")
@@ -232,9 +232,9 @@ class Movement:
             odometry.prevDirection = newPrevDir
             direction = odometry.currentDirection()
             #print(odometry.lValues)
-            print("prev:", newPrevDir)
+            """print("prev:", newPrevDir)
             print("diff:", odometry.directionDifferenceOfLine())
-            print("new:", direction)
+            print("new:", direction)"""
             if direction not in paths:
                 paths.append(direction)
                 newPrevDir = direction
@@ -254,6 +254,7 @@ class Movement:
             self.rightTurn(90)
             prevDir += 90
             prevDir = prevDir % 360
+
 
 
     # not in use, will probably be deleted

@@ -10,7 +10,7 @@ class Odometry:
         # Initializes odometry module
         self.lValues = lwheeldistances
         self.rValues = rwheeldistances
-        self.prevDirection = 2 * math.pi * prevdir/360
+        self.prevDirection = prevdir
         self.prevX = prevx
         self.prevY = prevy
 
@@ -31,7 +31,7 @@ class Odometry:
     def currentDirection(self):
         direction = (self.prevDirection) - self.directionDifferenceOfLine()
         direction = direction % 360
-        print(direction, self.prevDirection, self.directionDifferenceOfLine())
+        #print(direction, self.prevDirection, self.directionDifferenceOfLine())
         if (direction <= 45 or direction > 315):
             return 0
         elif (direction <= 135):
@@ -45,12 +45,12 @@ class Odometry:
 
 
     def coordinateDifferenceOfLine(self):
-
+        prevDir = 2 * math.pi * self.prevDirection/360
         xDiff = 0
         yDiff = 0
-        aftDirX = math.sin(self.prevDirection)
-        aftDirY = math.cos(self.prevDirection)
-        aftDir = self.prevDirection
+        aftDirX = math.sin(prevDir)
+        aftDirY = math.cos(prevDir)
+        aftDir = prevDir
         distancesum = 0
         for i in range(len(self.lValues)):
             prevDirX = aftDirX
@@ -69,7 +69,7 @@ class Odometry:
             xDiff += (math.cos(dirDiff/2) * prevDirX + math.sin(dirDiff/2) * (-prevDirY)) * distance / prevDirLength
             yDiff += (math.cos(dirDiff/2) * prevDirY + math.sin(dirDiff/2) * (prevDirX))  * distance / prevDirLength
 
-        return xDiff, yDiff
+        return xDiff, yDiff     # - Ydiff?
 
 
     def directionDifference(self, lDistance, rDistance):
