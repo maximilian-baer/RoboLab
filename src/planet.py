@@ -39,6 +39,38 @@ class Planet:
         self.targets = []
         self.position = []
         self.prev_position = []
+        self.path_target = []
+        self.is_path_selected = False
+        self.unexplored_paths = []
+
+    def exploration_complete(self) -> bool:
+        """
+        gets if exploration is complete
+        :return: boolean
+        """
+        if len(self.unexplored_paths) == 0:
+            return True
+        return False
+
+    def intelligent_search(self):
+        if len(self.path_target) > 0:
+            next_node = self.path_target.pop()
+            self.change_position((next_node[0], next_node[1]))
+        elif self.is_path_selected:
+            pass
+        else:
+            if self.exploration_complete():
+                pass
+            else:
+                copy_path = self.unexplored_paths[0]
+                v_min = [self.paths[copy_path[0]][copy_path[1]], self.shortest_path(self.position[0], copy_path)[0]]
+                for path in self.unexplored_paths:
+                    new_distance = self.shortest_path(self.position[0], path[0])[2]
+                    if v_min[1] < new_distance:
+                        v_min = [path, new_distance]
+                self.change_position(v_min[0][1])
+
+        self.is_path_selected = False
 
     def change_position(self, start: Tuple[Tuple[int, int], Direction]):
         self.prev_position = self.prev_position
@@ -50,12 +82,9 @@ class Planet:
 
         self.targets.append(target)
 
-    def output_paths(self):
-        for v in self.paths.keys():
-            print(v, self.paths[v])
-
-    def discover_paths(self, v, direction):
-        self.paths[v][direction] = ((None, None), None, None)
+    def discover_paths(self, node: Tuple[Tuple[int, int], Direction]):
+        self.paths[node[0]][node[1]] = ((None, None), None, None)
+        self.unexplored_paths.append((node[0], node[1]))
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction] = None,
@@ -70,6 +99,8 @@ class Planet:
         :param weight: Integer
         :return: void
         """
+        if start in self.unexplored_paths:
+            self.unexplored_paths.remove(start)
         if start[0] not in self.paths:
             self.paths[start[0]] = {}
         if target is not None and target[0] not in self.paths:
@@ -96,6 +127,7 @@ class Planet:
         :param startDirection: Int
         :return: void
         """
+        self.is_path_selected = True
         self.change_position((self.position[0], startDirection))
 
     def path_correction(self, startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight):
@@ -126,6 +158,7 @@ class Planet:
         :param pathWeight: Int
         :return: void
         """
+
         self.add_path(start=((startX, startY), startDirection), target=((endX, endY), endDirection), weight=pathWeight)
 
     def add_target(self, targetX, targetY):
@@ -186,14 +219,10 @@ class Planet:
         if track is None:
             return
 
-    def exploration_complete(self) -> bool:
-        """
-        gets if exploration is complete
-        :return: boolean
-        """
-        if input('exploration complete? (y/n) ') == 'y':
-            return True
-        return False
+    def output_paths(self):
+        for v in self.paths.keys():
+            print(v, self.paths[v])
+
 
     def on_target(self) -> bool:
         """
@@ -204,7 +233,6 @@ class Planet:
             if self.position == list(target):
                 return True
         return False
-
 
     @staticmethod
     def get_closest_vertex(vertices, distances):
@@ -228,7 +256,6 @@ class Planet:
             neighbour = (self.paths[vertex][direction][0], distance)
             neighbours.append(neighbour)
         return neighbours
-
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[
@@ -285,7 +312,7 @@ class Planet:
         while current_node != start:
             for direction in self.paths[prev_node[current_node]]:
                 if self.paths[prev_node[current_node]][direction][0] == current_node:
-                    track.append((prev_node[current_node], direction))
+                    track.append((prev_node[current_node], direction, distances[prev_node[current_node]]))
             current_node = prev_node[current_node]
         track.reverse()
         return track
