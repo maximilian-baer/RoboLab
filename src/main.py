@@ -14,7 +14,7 @@ import threading
 from communication import Communication
 from odometry import Odometry
 from planet import Direction, Planet
-from movement import Robot
+from movement import Movement
 
 client = None  # DO NOT EDIT
 
@@ -54,53 +54,31 @@ def run():
     print("Hello World!")
 
     #testing
-    robot = Robot()
-    robot.moveOnLine()
+    move = Movement()
 
-    """robot.rightTurn(90)
-    robot.moveOnLine()
-    robot.rightTurn(270)
-    robot.moveOnLine()
-    robot.moveOnLine()"""
+    """move.rightTurn(90)
+    
+    move.rightTurn(270)
+    move.moveOnLine()
+    move.moveOnLine()"""
 
-    odometry = Odometry(robot.lWheelDistances, robot.rWheelDistances, 0)
-    #print(robot.rWheelDistances)
-    #goTiny()
-    #robot.moveStraight(3)
-    #odometry = Odometry(robot.testlWheel Distances, robot.testrWheelDistances, 0)
+    """move.rightTurn(180)
+    odometry = Odometry(move.lWheelDistances, move.rWheelDistances, 0,0,0)
     print(odometry.directionDifferenceOfLine())
     print(odometry.coordinateDifferenceOfLine())
+    print(odometry.currentDirection())
+    print(odometry.currentCoordinates())
+    move.rightTurn(270)
+    odometry = Odometry(move.lWheelDistances, move.rWheelDistances, 0, 0, 0)
+    print(odometry.directionDifferenceOfLine())
+    print(odometry.coordinateDifferenceOfLine())
+    print(odometry.currentDirection())
+    print(odometry.currentCoordinates())"""
 
-    #go()
+    move.moveOnLine()
 
-def go():
-    m = ev3.LargeMotor("outB")
-    m.reset()
-    m.stop_action = "coast"
-    m.speed_sp = 200
-    n = ev3.LargeMotor("outC")
-    n.reset()
-    n.stop_action = "coast"
-    n.speed_sp = 200
-    n.command = "run-forever"
-    m.command = "run-forever"
-    time.sleep(10)
-    m.stop()
-    n.stop()
-def goTiny():
-    m = ev3.LargeMotor("outB")
-    m.reset()
-    m.stop_action = "coast"
-    m.speed_sp = 200
-    n = ev3.LargeMotor("outC")
-    n.reset()
-    n.stop_action = "coast"
-    n.speed_sp = 200
-    n.command = "run-forever"
-    m.command = "run-forever"
-    time.sleep(0.5)
-    m.stop()
-    n.stop()
+    move.findPathsOdometry(0)
+
 
 
 

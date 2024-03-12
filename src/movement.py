@@ -1,7 +1,10 @@
 import ev3dev.ev3 as ev3
 import time
 from odometry import Odometry
-class Robot:
+
+dpt = 0.48      # distance per tick
+
+class Movement:
     def __init__(self):
         self.white = 67.5  # (245, 465, 465)
         self.black = 1.5  # (30, 75, 75)
@@ -10,6 +13,8 @@ class Robot:
 
         self.testlWheelDistances = []
         self.testrWheelDistances = []
+
+        self.status = "free"
 
     def moveOnLine(self):
         self.rWheelDistances = []
@@ -70,8 +75,8 @@ class Robot:
 
             rgb = colorSensor.raw
 
-            self.rWheelDistances.append(0.48 * (outC.position-lastPositionC))       # in mm !!!
-            self.lWheelDistances.append(0.48 * (outB.position-lastPositionB))       # all distances from the wheels in one line
+            self.rWheelDistances.append(dpt * (outC.position-lastPositionC))       # in mm !!!
+            self.lWheelDistances.append(dpt * (outB.position-lastPositionB))       # all distances from the wheels in one line
             lastPositionC = outC.position
             lastPositionB = outB.position
 
@@ -79,11 +84,12 @@ class Robot:
         #outC.stop()
 
         if ultrasonicSensor.value() < 150:
-            """self.rightTurn(180)
-            self.moveOnLine()"""
+            self.status = "blocked"
+            self.rightTurn(180)
+            self.moveOnLine()
         else:
             # an Kreuzung angekommen
-            self.moveStraight(0.55)
+            self.moveStraight(0.45)
 
     def rightTurn(self, degree):
         outB = ev3.LargeMotor("outB")
@@ -103,11 +109,11 @@ class Robot:
         lastPositionC = 0
         while (outB.position < degree * 1.85 and outC.position < degree * 1.85):
             #i += (outB.position - lastPositionB)
-            self.rWheelDistances.append(0.48 * (outC.position - lastPositionC))  # in mm !!!
-            self.lWheelDistances.append(0.48 * (outB.position - lastPositionB))
+            self.rWheelDistances.append(dpt * (outC.position - lastPositionC))  # in mm !!!
+            self.lWheelDistances.append(dpt * (outB.position - lastPositionB))
             lastPositionC = outC.position
             lastPositionB = outB.position
-            time.sleep(0.1)
+            #time.sleep(0.1)
         outB.stop()
         outC.stop()
 
@@ -129,8 +135,8 @@ class Robot:
         lastPositionC = 0
         while (outB.position < rotNum * 360 and outC.position < rotNum * 360):
             # i += (outB.position - lastPositionB)
-            self.testrWheelDistances.append(0.48 * (outC.position - lastPositionC))  # in mm !!!
-            self.testlWheelDistances.append(0.48 * (outB.position - lastPositionB))
+            self.testrWheelDistances.append(dpt * (outC.position - lastPositionC))  # in mm !!!
+            self.testlWheelDistances.append(dpt * (outB.position - lastPositionB))
             lastPositionC = outC.position
             lastPositionB = outB.position
             time.sleep(0.1)
@@ -179,22 +185,10 @@ class Robot:
         print(brightness)
         return brightness
 
-    def findPaths90Turn(self, prevDir):
-        paths = []
-        colorSensor = ev3.ColorSensor()
-        colorSensor.mode = 'RGB-RAW'
-        for i in range(4):
-            rgb = colorSensor.raw
-            if rgb[1] < 200:
-                paths.append((i * 90 + prevDir) % 360)
-            self.perfectTurn(90)
-        return paths
-
 
     def findPathsOdometry(self, prevdir):
-        fullRot = False
+        done = False
         paths = []
-        odometry = Odometry(self.lWheelDistances, self.rWheelDistances, prevdir)
         colorSensor = ev3.ColorSensor()
         colorSensor.mode = 'RGB-RAW'
 
@@ -206,28 +200,74 @@ class Robot:
         outC.stop_action = "brake"
         outB.speed_sp = 100
         outC.speed_sp = -100
-        outC.command = "run-forever"
-        outB.command = "run-forever"
 
-        while(fullRot == False):
+        newPrevDir = prevdir
+        odometry = Odometry(self.lWheelDistances, self.rWheelDistances, newPrevDir, 0, 0)
+        while not done:
             self.lWheelDistances = []
             self.rWheelDistances = []
-            while (outB.position < 30):
-                lastPositionC = 0
-                lastPositionB = 0
+            outB.position = 0
+            outC.position = 0
+            outC.command = "run-forever"
+            outB.command = "run-forever"
+
+            lastPositionC = 0
+            lastPositionB = 0
+            while (outB.position < 60):
+                self.rWheelDistances.append(dpt * (outC.position - lastPositionC))  # in mm !!!
+                self.lWheelDistances.append(dpt * (outB.position - lastPositionB))
+                lastPositionC = outC.position
+                lastPositionB = outB.position
             rgb = colorSensor.raw
-            while (rgb[1] > 200):
-                self.rWheelDistances.append(0.48 * (outC.position - lastPositionC))  # in mm !!!
-                self.lWheelDistances.append(0.48 * (outB.position - lastPositionB))
+            while (rgb[0] > 50 or rgb[1] > 200 or rgb[2] > 50):
+                self.rWheelDistances.append(dpt * (outC.position - lastPositionC))  # in mm !!!
+                self.lWheelDistances.append(dpt * (outB.position - lastPositionB))
                 lastPositionC = outC.position
                 lastPositionB = outB.position
                 rgb = colorSensor.raw
+            outB.stop()
+            outC.stop()
+            odometry.lValues = self.lWheelDistances
+            odometry.rValues = self.rWheelDistances
+            odometry.prevDirection = newPrevDir
             direction = odometry.currentDirection()
-            paths.append(direction)
+            #print(odometry.lValues)
+            print("prev:", newPrevDir)
+            print("diff:", odometry.directionDifferenceOfLine())
+            print("new:", direction)
+            if direction not in paths:
+                paths.append(direction)
+                newPrevDir = direction
+            else:
+                done = True
             if direction == prevdir:
-                fullRot = True
-        outB.stop()
-        outC.stop()
+                done = True
+
+        self.changeDirectionAbsolut(direction, prevdir)
+
+        print(paths)
+        return paths
+
+
+    def changeDirectionAbsolut(self, prevDir, newDir):
+        while prevDir != newDir:
+            self.rightTurn(90)
+            prevDir += 90
+            prevDir = prevDir % 360
+
+
+    # not in use, will probably be deleted
+    def findPaths90Turn(self, prevDir):
+        paths = []
+        colorSensor = ev3.ColorSensor()
+        colorSensor.mode = 'RGB-RAW'
+        for i in range(4):
+            rgb = colorSensor.raw
+            if rgb[1] < 200:
+                paths.append((i * 90 + prevDir) % 360)
+            self.perfectTurn(90)
+        return paths
+
 
     def perfectTurn(self, degree):
         """turn exactly x degrees"""

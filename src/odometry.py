@@ -3,14 +3,21 @@
 import math
 import time
 
-a = 118       # space between wheels in mm, 11,8 cm, measured from mid to mid, 9 inbetween, one wheel width = 2,8
+# a = 118       # space between wheels in mm, 11,8 cm, measured from mid to mid, 9 inbetween, one wheel width = 2,8
+a = 90
 class Odometry:
-    def __init__(self, lwheeldistances, rwheeldistances, prevdir):
+    def __init__(self, lwheeldistances, rwheeldistances, prevdir, prevx, prevy):
         # Initializes odometry module
         self.lValues = lwheeldistances
         self.rValues = rwheeldistances
         self.prevDirection = 2 * math.pi * prevdir/360
+        self.prevX = prevx
+        self.prevY = prevy
 
+
+    def currentCoordinates(self):
+        difference = self.coordinateDifferenceOfLine()
+        return self.prevX + round(difference[0],0), self.prevY + round(difference[1],0)
 
 
     def directionDifferenceOfLine(self):
@@ -18,12 +25,13 @@ class Odometry:
         for i in range(len(self.lValues)):
             dirChange += self.directionDifference(self.lValues[i], self.rValues[i])
             #print(self.lValues[i], self.rValues[i])
-            #print(dirChange*360/(2*math.pi))
         return dirChange * 360 / (2 * math.pi)
 
+
     def currentDirection(self):
-        direction = self.direction - self.directionDifferenceOfLine()
+        direction = (self.prevDirection) - self.directionDifferenceOfLine()
         direction = direction % 360
+        print(direction, self.prevDirection, self.directionDifferenceOfLine())
         if (direction <= 45 or direction > 315):
             return 0
         elif (direction <= 135):
@@ -34,7 +42,6 @@ class Odometry:
             return 270
         else:
             return direction
-
 
 
     def coordinateDifferenceOfLine(self):
@@ -66,7 +73,7 @@ class Odometry:
 
 
     def directionDifference(self, lDistance, rDistance):
-        return (rDistance - lDistance) / a
+        return ((rDistance - lDistance) / a) #* 1.2          # * 1.2 is experimental!!! knowing this is always at least 10-40° less per 90°, this is an experimental fix
 
 
     def distance(self, lDistance, rDistance):       # distance for one intervall in mm
