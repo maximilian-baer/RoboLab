@@ -3,7 +3,7 @@
 # Attention: Do not import the ev3dev.ev3 module in this file
 from enum import IntEnum, unique
 from typing import Optional, List, Tuple, Dict
-import queue
+
 
 @unique
 class Direction(IntEnum):
@@ -32,25 +32,55 @@ class Planet:
     """
 
     # DO NOT EDIT THE METHOD SIGNATURE
-    def __init__(self):
+    def __init__(self, planet_name: str, start: Tuple[Tuple[int, int], Direction]):
         """ Initializes the data structure """
+        self.planet_name = planet_name
         self.paths = {}
+        self.add_path(start=start)
         self.targets = []
-        self.position = []
+        self.position = [Tuple[start[0][0], start[0][1]], start[1]]
         self.prev_position = []
-        self.next_position = []
 
-    def change_position(self, x, y):
-        if len(self.position) == 2:
-            self.prev_position = self.prev_position
-        self.position = [x, y]
+    def exploration_complete(self) -> bool:
+        """
+        gets if exploration is complete
+        :return: boolean
+        """
+        pass
+
+    def path_select(self):
+        """
+        sets the direction of the next path of the bot
+        :param startDirection: Int
+        :return: void
+        """
+        pass
+
+    def path_unveiled(self):
+        pass
+
+    def change_position(self, start: Tuple[Tuple[int, int], Direction]):
+        self.prev_position = self.prev_position
+        self.position = [list(start[0]), Direction]
+
+    def receive_target(self, target: Tuple[int, int]):
+        if target not in self.paths:
+            self.paths[target] = {}
+
+        self.targets.append(target)
+
+    def on_target(self) -> bool:
+        for target in self.targets:
+            if self.position == list(target):
+                return True
+        return False
 
     def discover_paths(self, v, direction):
         self.paths[v][direction] = ((None, None), None, None)
 
     # DO NOT EDIT THE METHOD SIGNATURE
-    def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
-                 weight: int):
+    def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction] = None,
+                 weight: int = None):
         """
          Adds a bidirectional path defined between the start and end coordinates to the map and assigns the weight to it
 
@@ -63,10 +93,11 @@ class Planet:
         """
         if start[0] not in self.paths:
             self.paths[start[0]] = {}
-        if target[0] not in self.paths:
+        if target is not None and target[0] not in self.paths:
             self.paths[target[0]] = {}
-        self.paths[start[0]][start[1]] = (target[0], target[1], weight)
-        self.paths[target[0]][target[1]] = (start[0], start[1], weight)
+        if target is not None:
+            self.paths[start[0]][start[1]] = (target[0], target[1], weight)
+            self.paths[target[0]][target[1]] = (start[0], start[1], weight)
 
     def change_weight(self, v, direction, new_weight):
         copy_target = self.paths[v][direction]
@@ -104,6 +135,7 @@ class Planet:
             return
 
 
+
     @staticmethod
     def get_closest_vertex(vertices, distances):
         v_min = vertices.pop()
@@ -127,11 +159,6 @@ class Planet:
             neighbours.append(neighbour)
         return neighbours
 
-    def receive_target(self, target):
-        if target not in self.paths:
-            self.paths[target] = {}
-
-        self.targets.append(target)
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[
