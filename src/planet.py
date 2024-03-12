@@ -50,6 +50,10 @@ class Planet:
 
         self.targets.append(target)
 
+    def output_paths(self):
+        for v in self.paths.keys():
+            print(v, self.paths[v])
+
     def discover_paths(self, v, direction):
         self.paths[v][direction] = ((None, None), None, None)
 
