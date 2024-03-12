@@ -52,11 +52,11 @@ def run():
     print('move to first node'); time.sleep(1)
     print('robot searches for next paths -> send to Planet'); time.sleep(1)
     while not comm.end_exploration:
-        planet.intelligent_search()     # calc next path by Planet (intelligent search)
+        # planet.intelligent_search()     # calc next path by Planet (intelligent search)
         print(planet.position[0][0], planet.position[0][1], planet.get_direction()); time.sleep(1)
-        comm.path_select_and_result_handler(select={'Xs': input('nextX: '),
-                                        'Ys': input('nextY: '),
-                                        'Ds': input('nextDirection: ')})
+        comm.path_select_and_result_handler(select={'Xs': int(input('nextX: ')),
+                                        'Ys': int(input('nextY: ')),
+                                        'Ds': int(input('nextDirection: '))})
                 # send next path wanted and handle results -> send to Planet
         print('Robot gets next path from Planet (check if target available/server/else) and goes there'); time.sleep(1)
         print('process data from the drive in odometry'); time.sleep(1)
