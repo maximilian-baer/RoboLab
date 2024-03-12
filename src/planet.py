@@ -32,13 +32,12 @@ class Planet:
     """
 
     # DO NOT EDIT THE METHOD SIGNATURE
-    def __init__(self, planet_name: str, start: Tuple[Tuple[int, int], Direction]):
+    def __init__(self):
         """ Initializes the data structure """
-        self.planet_name = planet_name
         self.paths = {}
-        self.add_path(start=start)
+        # self.add_path(start=start)
         self.targets = []
-        self.position = [Tuple[start[0][0], start[0][1]], start[1]]
+        self.position = []
         self.prev_position = []
 
     def exploration_complete(self) -> bool:
@@ -46,17 +45,6 @@ class Planet:
         gets if exploration is complete
         :return: boolean
         """
-        pass
-
-    def path_select(self):
-        """
-        sets the direction of the next path of the bot
-        :param startDirection: Int
-        :return: void
-        """
-        pass
-
-    def path_unveiled(self):
         pass
 
     def change_position(self, start: Tuple[Tuple[int, int], Direction]):
@@ -68,12 +56,6 @@ class Planet:
             self.paths[target] = {}
 
         self.targets.append(target)
-
-    def on_target(self) -> bool:
-        for target in self.targets:
-            if self.position == list(target):
-                return True
-        return False
 
     def discover_paths(self, v, direction):
         self.paths[v][direction] = ((None, None), None, None)
@@ -98,6 +80,79 @@ class Planet:
         if target is not None:
             self.paths[start[0]][start[1]] = (target[0], target[1], weight)
             self.paths[target[0]][target[1]] = (start[0], start[1], weight)
+
+    def set_planet(self, planetName, startX, startY, startOrientation):
+        """
+        sets the planet's name and startX, startY, startOrientation of the bot
+        :param planetName: String
+        :param startX: Int
+        :param startY: Int
+        :param startOrientation: Int
+        :return: void
+        """
+        self.add_path(start=((startX, startY), startOrientation))
+        self.change_position(((startX, startY), startOrientation))
+
+    def path_select(self, startDirection):
+        """
+        sets the direction of the next path of the bot
+        :param startDirection: Int
+        :return: void
+        """
+        self.change_position((self.position[0], startDirection))
+
+    def path_correction(self, startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight):
+        """
+        sets the actual position of start and end nodes of the path taken by the bot -> path to be added to path list
+        :param startX: Int
+        :param startY: Int
+        :param startDirection: Int
+        :param endX: Int
+        :param endY: Int
+        :param endDirection: Int
+        :param pathStatus: "free|blocked"
+        :param pathWeight: Int
+        :return: void
+        """
+        self.add_path(start=((startX, startY), startDirection), target=((endX, endY), endDirection), weight=pathWeight)
+
+    def path_unveiled(self, startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight):
+        """
+        adds new path found by the mothership
+        :param startX: Int
+        :param startY: Int
+        :param startDirection: Int
+        :param endX: Int
+        :param endY: Int
+        :param endDirection: Int
+        :param pathStatus: "free|blocked"
+        :param pathWeight: Int
+        :return: void
+        """
+        self.add_path(start=((startX, startY), startDirection), target=((endX, endY), endDirection), weight=pathWeight)
+
+    def add_target(self, targetX, targetY):
+        """
+        adds new Target to Target-list
+        :param targetX: Int
+        :param targetY: Int
+        :return: void
+        """
+        self.receive_target(target=(targetX, targetY))
+
+    def adjust(self, startX, startY, startDirection, endX, endY, endDirection):
+        """
+        dunno, just ignore ig
+        :param startX: Int
+        :param startY: Int
+        :param startDirection: Int
+        :param endX: Int
+        :param endY: Int
+        :param endDirection: Int
+        :return: void
+        """
+        print(startX, startY, startDirection, endX, endY, endDirection)
+        pass
 
     def change_weight(self, v, direction, new_weight):
         copy_target = self.paths[v][direction]
@@ -134,6 +189,24 @@ class Planet:
         if track is None:
             return
 
+    def exploration_complete(self) -> bool:
+        """
+        gets if exploration is complete
+        :return: boolean
+        """
+        if input('exploration complete? (y/n) ') == 'y':
+            return True
+        return False
+
+    def on_target(self) -> bool:
+        """
+        gets if bot is on a target
+        :return: boolean
+        """
+        for target in self.targets:
+            if self.position == list(target):
+                return True
+        return False
 
 
     @staticmethod
@@ -219,199 +292,3 @@ class Planet:
             current_node = prev_node[current_node]
         track.reverse()
         return track
-
-
-
-
-    def exploration_complete(self):
-        """
-        gets if exploration is complete
-        :return: boolean
-        """
-        if input('exploration complete? (y/n) ') == 'y':
-            return True
-        return False
-
-    def on_target(self):
-        """
-        gets if bot is on a target
-        :return: boolean
-        """
-        if input('Target reached? (y/n) ') == 'y':
-            return True
-        return False
-
-    def set_planet(self, planetName, startX, startY, startOrientation):
-        """
-        sets the planet's name and startX, startY, startOrientation of the bot
-        :param planetName: String
-        :param startX: Int
-        :param startY: Int
-        :param startOrientation: Int
-        :return: void
-        """
-        print(planetName, startX, startY, startOrientation)
-        pass
-
-    def path_select(self, startDirection):
-        """
-        sets the direction of the next path of the bot
-        :param startDirection: Int
-        :return: void
-        """
-        print(startDirection)
-        pass
-
-    def path_correction(self, startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight):
-        """
-        sets the actual position of start and end nodes of the path taken by the bot -> path to be added to path list
-        :param startX: Int
-        :param startY: Int
-        :param startDirection: Int
-        :param endX: Int
-        :param endY: Int
-        :param endDirection: Int
-        :param pathStatus: "free|blocked"
-        :param pathWeight: Int
-        :return: void
-        """
-        print(startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight)
-        pass
-
-    def path_unveiled(self, startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight):
-        """
-        adds new path found by the mothership
-        :param startX: Int
-        :param startY: Int
-        :param startDirection: Int
-        :param endX: Int
-        :param endY: Int
-        :param endDirection: Int
-        :param pathStatus: "free|blocked"
-        :param pathWeight: Int
-        :return: void
-        """
-        print(startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight)
-        pass
-
-    def add_target(self, targetX, targetY):
-        """
-        adds new Target to Target-list
-        :param targetX: Int
-        :param targetY: Int
-        :return: void
-        """
-        print(targetX, targetY)
-        pass
-
-    def adjust(self, startX, startY, startDirection, endX, endY, endDirection):
-        """
-        dunno, just ignore ig
-        :param startX: Int
-        :param startY: Int
-        :param startDirection: Int
-        :param endX: Int
-        :param endY: Int
-        :param endDirection: Int
-        :return: void
-        """
-        print(startX, startY, startDirection, endX, endY, endDirection)
-        pass
-
-
-
-    def exploration_complete(self):
-        """
-        gets if exploration is complete
-        :return: boolean
-        """
-        if input('exploration complete? (y/n) ') == 'y':
-            return True
-        return False
-
-    def on_target(self):
-        """
-        gets if bot is on a target
-        :return: boolean
-        """
-        if input('Target reached? (y/n) ') == 'y':
-            return True
-        return False
-
-    def set_planet(self, planetName, startX, startY, startOrientation):
-        """
-        sets the planet's name and startX, startY, startOrientation of the bot
-        :param planetName: String
-        :param startX: Int
-        :param startY: Int
-        :param startOrientation: Int
-        :return: void
-        """
-        print(planetName, startX, startY, startOrientation)
-        pass
-
-    def path_select(self, startDirection):
-        """
-        sets the direction of the next path of the bot
-        :param startDirection: Int
-        :return: void
-        """
-        print(startDirection)
-        pass
-
-    def path_correction(self, startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight):
-        """
-        sets the actual position of start and end nodes of the path taken by the bot -> path to be added to path list
-        :param startX: Int
-        :param startY: Int
-        :param startDirection: Int
-        :param endX: Int
-        :param endY: Int
-        :param endDirection: Int
-        :param pathStatus: "free|blocked"
-        :param pathWeight: Int
-        :return: void
-        """
-        print(startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight)
-        pass
-
-    def path_unveiled(self, startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight):
-        """
-        adds new path found by the mothership
-        :param startX: Int
-        :param startY: Int
-        :param startDirection: Int
-        :param endX: Int
-        :param endY: Int
-        :param endDirection: Int
-        :param pathStatus: "free|blocked"
-        :param pathWeight: Int
-        :return: void
-        """
-        print(startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight)
-        pass
-
-    def add_target(self, targetX, targetY):
-        """
-        adds new Target to Target-list
-        :param targetX: Int
-        :param targetY: Int
-        :return: void
-        """
-        print(targetX, targetY)
-        pass
-
-    def adjust(self, startX, startY, startDirection, endX, endY, endDirection):
-        """
-        dunno, just ignore ig
-        :param startX: Int
-        :param startY: Int
-        :param startDirection: Int
-        :param endX: Int
-        :param endY: Int
-        :param endDirection: Int
-        :return: void
-        """
-        print(startX, startY, startDirection, endX, endY, endDirection)
-        pass
-
