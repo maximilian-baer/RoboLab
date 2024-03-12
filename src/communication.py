@@ -56,7 +56,7 @@ class Communication:
         self.stop_listen(self.expl)
         self.stop_listen(self.planet_url(self.planetName))      # end connection
 
-    def path_and_result_handler(self, path):
+    def path_and_result_handler(self, path: dict):
         """
         communication to be held at each node part one
         :param path: Dict with path taken {"Xs": _, "Ys": _, "Ds": _, "Xe": _, "Ye": _, "De": _, "pathStatus": _}
@@ -75,7 +75,7 @@ class Communication:
             self.end_exploration = True     # breaking condition
         self.listen()  # handle results
 
-    def path_select_and_result_handler(self, select):
+    def path_select_and_result_handler(self, select: dict):
         """
         communication to be held at each node part two
         :param select: Dict with next node {"Xs": _, "Ys": _, "Ds": _}
@@ -87,7 +87,7 @@ class Communication:
                             select['Ds'])  # send path wanting to take
         self.listen()  # handle results
 
-    def message_handler(self, message):
+    def message_handler(self, message: dict):
         """
         handle response for on_message
         :param message: {"from": String , "type": String , ?"payload": Dict}
@@ -144,17 +144,17 @@ class Communication:
             else:
                 print('debug: {}'.format(message["payload"]))
 
-    def message_exploration_completed(self, topic, message):
+    def message_exploration_completed(self, topic: str, message: str):
         """
         publish explorationCompleted msg with message to topic
-        :param message: String
+        :param message: explorationCompleted msg
         :param topic: 'explorer/013' | planetURL(...)
         :return: void
         """
         msg = {"from": "client", "type": "explorationCompleted", "payload": {"message": message}}
         self.send_message(topic, msg)
 
-    def message_select(self, topic, startX, startY, startDirection):
+    def message_select(self, topic: str, startX: int, startY: int, startDirection: int):
         """
         publish pathSelect msg with start parameters to topic
         :param topic: 'explorer/013' | planetURL(...)
@@ -168,16 +168,17 @@ class Communication:
                                                                    "startDirection": startDirection}}
         self.send_message(topic, msg)
 
-    def message_path(self, topic, Xs, Ys, Ds, Xe, Ye, De, pathStatus):
+    def message_path(self, topic: str, Xs: int, Ys: int, Ds: int, Xe: int, Ye: int, De: int, pathStatus: str):
         """
         publish path msg with start and end points to topic
         :param topic: 'explorer/013' | planetURL(...)
-        :param Xs: Int
-        :param Ys: Int
-        :param Ds: Int
-        :param Xe: Int
-        :param Ye: Int
-        :param De: Int
+        :param Xs: startX
+        :param Ys: startY
+        :param Ds: startDirection
+        :param Xe: endX
+        :param Ye: endY
+        :param De: endDirection
+        :param pathStatus: "free | blocked"
         :return: void
         """
         msg = {"from": "client", "type": "path", "payload": {"startX": Xs, "startY": Ys, "startDirection": Ds,
@@ -185,7 +186,7 @@ class Communication:
                                                              "pathStatus": pathStatus}}
         self.send_message(topic, msg)
 
-    def planet_url(self, planetName):
+    def planet_url(self, planetName: str):
         """
         return planetURL based on planetName
         :param planetName: String
@@ -193,7 +194,7 @@ class Communication:
         """
         return "planet/{}/013".format(planetName)
 
-    def message_target_reached(self, topic, message):
+    def message_target_reached(self, topic: str, message: str):
         """
         publish targetReached msg with message to topic
         :param topic: 'explorer/013' | planetURL(...)
@@ -203,7 +204,7 @@ class Communication:
         msg = {"from": "client", "type": "targetReached", "payload": {"message": message}}
         self.send_message(topic, msg)
 
-    def message_ready(self, topic):
+    def message_ready(self, topic: str):
         """
         publish ready msg to topic
         :param topic: 'explorer/013' | planetURL(...)
@@ -212,7 +213,7 @@ class Communication:
         msg = {"from": "client", "type": "ready", "payload": None}
         self.send_message(topic, msg)
 
-    def message_test_planet(self, topic, planet_name):
+    def message_test_planet(self, topic: str, planet_name: str):
         """
         publish testPlanet msg with planetName to topic and set internal planetName
         :param topic: 'explorer/013' | planetURL(...)
@@ -244,7 +245,7 @@ class Communication:
         except:
             print('Communication.disconnect: could not connect to mothership.inf')
 
-    def start_listen(self, topic):
+    def start_listen(self, topic: str):
         """
         start listening into a specific channel
         :param topic: String
@@ -257,7 +258,7 @@ class Communication:
         except:
             print('Communication.start_listen: could not start listening on topic: {}...'.format(topic))
 
-    def stop_listen(self, topic):
+    def stop_listen(self, topic: str):
         """
         stop listening into a specific channel
         :param topic: String
@@ -325,7 +326,12 @@ class Communication:
         except:
             print('Communication.send_message: Error sending message')
 
-    def create_msg(self, message):
+    def create_msg(self, message: dict):
+        """
+        create JSON like message for sending to mothership
+        :param message: Dict {"from": String, "type": String, "payload": Dict}
+        :return: String
+        """
         try:
             msg = "{"
             msg += '''"from":"{}", "type":"{}"'''.format(message[format("from")], message["type"])
