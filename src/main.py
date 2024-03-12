@@ -53,7 +53,7 @@ def run():
     print('robot searches for next paths -> send to Planet'); time.sleep(1)
     while not comm.end_exploration:
         # planet.intelligent_search()     # calc next path by Planet (intelligent search)
-        print(planet.position[0][0], planet.position[0][1], planet.get_direction()); time.sleep(1)
+        # print(planet.position[0][0], planet.position[0][1], planet.get_direction()); time.sleep(1)
         comm.path_select_and_result_handler(select={'Xs': int(input('nextX: ')),
                                         'Ys': int(input('nextY: ')),
                                         'Ds': int(input('nextDirection: '))})
