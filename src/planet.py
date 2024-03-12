@@ -70,11 +70,13 @@ class Planet:
             if self.exploration_complete():
                 pass
             else:
-                copy_path = self.unexplored_paths[0]
-                v_min = [self.paths[copy_path[0]][copy_path[1]], self.shortest_path(start=(self.position[0][0], self.position[0][1]), target=copy_path)[1]]
+                v_min = self.unexplored_paths[0]
+                track = self.shortest_path((self.position[0][0], self.position[0][1]), v_min)
+                distance_min = track[len(track) - 1][2]
                 for path in self.unexplored_paths:
-                    new_distance = self.shortest_path((self.position[0][0], self.position[0][1]), path[0])[1]
-                    if v_min[1] < new_distance:
+                    track = self.shortest_path(start=(self.position[0][0], self.position[0][1]), target=path[0])
+                    new_distance = track[len(track) - 1][2]
+                    if distance_min < new_distance:
                         v_min = [path, new_distance]
                 self.change_position(v_min[0][1])
 
@@ -317,7 +319,7 @@ class Planet:
                     distances[w[0]] = new_distance
                     prev_node[w[0]] = v
         # backtracking
-        track.append((target, distances[target]))
+        track.append((target, None, distances[target]))
         current_node = target
         while current_node != start:
             for direction in self.paths[prev_node[current_node]]:
