@@ -94,7 +94,7 @@ class Communication:
         :return: void
         """
         print('from {}:'.format(message["from"]))
-        print('got payload: ' + str(message.get("payload"))[1:-1] + ' , with type: {}'.format(message["type"]))
+        print('got payload: ' + str(message.get("payload")) + ' , with type: {}'.format(message["type"]))
         if message["from"] == "server":
             if message["type"] == "planet":
                 self.planetName = message["payload"]["planetName"]

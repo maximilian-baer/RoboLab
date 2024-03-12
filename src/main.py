@@ -49,17 +49,21 @@ def run():
     odometry = Odometry()
     comm.planet = planet
     comm.first_communication()  # set planet and ready -> prev & curr pos in Planet
-    print('move to first node'); time.sleep(3)
-    print('robot searches for next paths -> send to Planet'); time.sleep(3)
+    print('move to first node'); time.sleep(1)
+    print('robot searches for next paths -> send to Planet'); time.sleep(1)
     while not comm.end_exploration:
-        print('calc next path by Planet (intelligent search)'); time.sleep(3)
-        comm.path_select_and_result_handler(select={'Xs': int(input('currX: ')),
-                                        'Ys': int(input('currY: ')),
-                                        'Ds': int(input('startDirection: '))})
+        planet.intelligent_search()     # calc next path by Planet (intelligent search)
+        print(planet.position[0][0], planet.position[0][1], planet.get_direction()); time.sleep(1)
+        comm.path_select_and_result_handler(select={'Xs': planet.position[0][0],
+                                        'Ys': planet.position[0][1],
+                                        'Ds': planet.get_direction()})
                 # send next path wanted and handle results -> send to Planet
-        print('Robot gets next path from Planet (check if target available/server/else) and goes there'); time.sleep(3)
-        print('process data from the drive in odometry'); time.sleep(3)
-        print('robot searches for next paths -> send to Planet'); time.sleep(3)    # apply odometry after each movement!
+        print('Robot gets next path from Planet (check if target available/server/else) and goes there'); time.sleep(1)
+        print('process data from the drive in odometry'); time.sleep(1)
+        print('robot searches for next paths -> send to Planet'); time.sleep(1)    # apply odometry after each movement!
+        # planet.discover_paths(((int(input('nodeX: ')),
+                                int(input('nodeY: '))),
+                               Direction(int(input('nodeDirection: ')))))
         comm.path_and_result_handler(path={'Xs': int(input('prevX: ')),
                                       'Ys': int(input('prevY: ')),
                                       'Ds': int(input('prevOrientation: ')),
@@ -68,6 +72,7 @@ def run():
                                       'De': int(input('endOrientation: ')),
                                       'pathStatus': input('pathStatus: ')})
                 # send path msg and send result to Planet or end exploration
+        planet.output_paths()
         pass
     comm.end_communication()  # close communication
 

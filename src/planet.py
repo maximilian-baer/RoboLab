@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import time
 # Attention: Do not import the ev3dev.ev3 module in this file
 from enum import IntEnum, unique
 from typing import Optional, List, Tuple, Dict
@@ -37,11 +37,15 @@ class Planet:
         self.paths = {}
         # self.add_path(start=start)
         self.targets = []
-        self.position = []
+        self.position = [[0, 0], Direction.NORTH]
         self.prev_position = []
         self.path_target = []
         self.is_path_selected = False
         self.unexplored_paths = []
+
+    def get_direction(self):
+        p = self.position[1]
+        return p.value
 
     def exploration_complete(self) -> bool:
         """
@@ -63,9 +67,9 @@ class Planet:
                 pass
             else:
                 copy_path = self.unexplored_paths[0]
-                v_min = [self.paths[copy_path[0]][copy_path[1]], self.shortest_path(self.position[0], copy_path)[0]]
+                v_min = [self.paths[copy_path[0]][copy_path[1]], self.shortest_path(start=(self.position[0][0], self.position[0][1]), target=copy_path)[1]]
                 for path in self.unexplored_paths:
-                    new_distance = self.shortest_path(self.position[0], path[0])[2]
+                    new_distance = self.shortest_path((self.position[0][0], self.position[0][1]), path[0])[1]
                     if v_min[1] < new_distance:
                         v_min = [path, new_distance]
                 self.change_position(v_min[0][1])
@@ -73,8 +77,8 @@ class Planet:
         self.is_path_selected = False
 
     def change_position(self, start: Tuple[Tuple[int, int], Direction]):
-        self.prev_position = self.prev_position
-        self.position = [list(start[0]), Direction]
+        self.prev_position = self.position
+        self.position = [list(start[0]), start[1]]
 
     def receive_target(self, target: Tuple[int, int]):
         if target not in self.paths:
@@ -83,8 +87,8 @@ class Planet:
         self.targets.append(target)
 
     def discover_paths(self, node: Tuple[Tuple[int, int], Direction]):
-        self.paths[node[0]][node[1]] = ((None, None), None, None)
-        self.unexplored_paths.append((node[0], node[1]))
+        self.add_path(start=node)
+        self.unexplored_paths.append(node)
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction] = None,
@@ -119,7 +123,8 @@ class Planet:
         :return: void
         """
         self.add_path(start=((startX, startY), startOrientation))
-        self.change_position(((startX, startY), startOrientation))
+        self.position = [[startX, startY], startOrientation]
+        self.change_position(((startX, startY), Direction(int(startOrientation))))
 
     def path_select(self, startDirection):
         """
@@ -128,7 +133,8 @@ class Planet:
         :return: void
         """
         self.is_path_selected = True
-        self.change_position((self.position[0], startDirection))
+        print(startDirection); time.sleep(5)
+        self.change_position(((self.position[0][0], self.position[0][1]), Direction(int(startDirection))))
 
     def path_correction(self, startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight):
         """
@@ -259,7 +265,7 @@ class Planet:
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[
-        List[Tuple[Tuple[int, int], Direction]]]:
+        List[Tuple[Tuple[int, int], Direction, int]]]:
         """
         Returns a shortest path between two nodes
 
@@ -307,7 +313,7 @@ class Planet:
                     distances[w[0]] = new_distance
                     prev_node[w[0]] = v
         # backtracking
-        track.append(target)
+        track.append((target, distances[target]))
         current_node = target
         while current_node != start:
             for direction in self.paths[prev_node[current_node]]:
