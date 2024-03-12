@@ -62,8 +62,8 @@ def run():
         print('process data from the drive in odometry'); time.sleep(1)
         print('robot searches for next paths -> send to Planet'); time.sleep(1)    # apply odometry after each movement!
         # planet.discover_paths(((int(input('nodeX: ')),
-                                int(input('nodeY: '))),
-                               Direction(int(input('nodeDirection: ')))))
+        #                       int(input('nodeY: '))),
+        #                      Direction(int(input('nodeDirection: ')))))
         comm.path_and_result_handler(path={'Xs': int(input('prevX: ')),
                                       'Ys': int(input('prevY: ')),
                                       'Ds': int(input('prevOrientation: ')),
