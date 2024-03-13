@@ -45,28 +45,13 @@ def run():
     # THE EXECUTION OF ALL CODE SHALL BE STARTED FROM WITHIN THIS FUNCTION.
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
 
-    """comm = Communication(client, logger)
+    comm = Communication(client, logger)
     comm.planet = Planet()
     comm.connect()
     comm.listen('explorer/013')
-    comm.disconnect()"""
+    comm.disconnect()
 
     print("Hello World!")
-
-    #testing
-    move = Movement()
-
-    move.moveOnLine()
-    odometry1 = Odometry(move.lWheelDistances, move.rWheelDistances, 90,0,0)
-    print(odometry1.directionDifferenceOfLine())
-    print(odometry1.coordinateDifferenceOfLine())
-    print(odometry1.currentDirection())
-    print(odometry1.currentCoordinates())
-        # Ydiff negative?
-
-    "move.findPathsOdometry(270)"
-
-    """print(move.currentBrightness())"""
 
 
 # DO NOT EDIT

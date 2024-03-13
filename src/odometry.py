@@ -6,18 +6,22 @@ import time
 # a = 118       # space between wheels in mm, 11,8 cm, measured from mid to mid, 9 inbetween, one wheel width = 2,8
 a = 90
 class Odometry:
-    def __init__(self, lwheeldistances, rwheeldistances, prevdir, prevx, prevy):
+    def __init__(self, lwheeldistances, rwheeldistances, prevdir, prevx=0, prevy=0, pathstatus="free"):
         # Initializes odometry module
         self.lValues = lwheeldistances
         self.rValues = rwheeldistances
         self.prevDirection = prevdir
         self.prevX = prevx
         self.prevY = prevy
+        self.pathStatus = pathstatus
 
 
     def currentCoordinates(self):
-        difference = self.coordinateDifferenceOfLine()
-        return self.prevX + round(difference[0],0), self.prevY + round(difference[1],0)
+        if(self.pathStatus == "blocked"):
+            return self.prevX, self.prevY
+        else:
+            difference = self.coordinateDifferenceOfLine()
+            return self.prevX + round(difference[0],0), self.prevY + round(difference[1],0)
 
 
     def directionDifferenceOfLine(self):
@@ -29,26 +33,28 @@ class Odometry:
 
 
     def currentDirection(self):
-        direction = (self.prevDirection) - self.directionDifferenceOfLine()
-        direction = direction % 360
-        #print(direction, self.prevDirection, self.directionDifferenceOfLine())
-        if (direction <= 45 or direction > 315):
-            return 0
-        elif (direction <= 135):
-            return 90
-        elif (direction <= 225):
-            return 180
-        elif (direction <= 315):
-            return 270
+        if self.pathStatus == "blocked":
+            return (self.prevDirection + 180) % 360
         else:
-            return direction
+            direction = (self.prevDirection) - self.directionDifferenceOfLine()
+            direction = direction % 360
+            if (direction <= 45 or direction > 315):
+                return 0
+            elif (direction <= 135):
+                return 90
+            elif (direction <= 225):
+                return 180
+            elif (direction <= 315):
+                return 270
+            else:
+                return direction
 
 
     def coordinateDifferenceOfLine(self):
-        prevDir = 2 * math.pi * self.prevDirection/360
+        prevDir = 2 * math.pi * ((360 - self.prevDirection)%360)/360
         xDiff = 0
         yDiff = 0
-        aftDirX = math.sin(prevDir)
+        aftDirX = -math.sin(prevDir)
         aftDirY = math.cos(prevDir)
         aftDir = prevDir
         distancesum = 0
@@ -59,17 +65,17 @@ class Odometry:
 
             dirDiff = self.directionDifference(self.lValues[i], self.rValues[i])
             aftDir = prevDir + dirDiff
-            aftDirX = math.sin(aftDir)
+            aftDirX = -math.sin(aftDir)
             aftDirY = math.cos(aftDir)
 
             prevDirLength = math.sqrt(prevDirX**2 + prevDirY**2)
 
             distance = self.distance(self.lValues[i], self.rValues[i]) / 500    # in mm, coordinates unit = 50 cm -> 1 unit = 500 mm
 
-            xDiff += (math.cos(dirDiff/2) * prevDirX + math.sin(dirDiff/2) * (-prevDirY)) * distance / prevDirLength
-            yDiff += (math.cos(dirDiff/2) * prevDirY + math.sin(dirDiff/2) * (prevDirX))  * distance / prevDirLength
+            xDiff += (math.cos(dirDiff/2) * prevDirX + math.sin(dirDiff/2) * (prevDirY)) * distance / prevDirLength
+            yDiff += (math.cos(dirDiff/2) * prevDirY + math.sin(dirDiff/2) * (-prevDirX))  * distance / prevDirLength
 
-        return xDiff, yDiff     # - Ydiff?
+        return 1.25 * xDiff, 1.25 * yDiff       # *1.25 because 1 unit is always measured as 70 - 85
 
 
     def directionDifference(self, lDistance, rDistance):
