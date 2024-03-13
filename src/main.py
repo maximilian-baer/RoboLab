@@ -10,6 +10,7 @@ import uuid
 import signal
 import time
 import threading
+import asyncio
 
 from communication import Communication
 from odometry import Odometry
@@ -52,17 +53,22 @@ def run():
     comm.planet = planet
     comm.first_communication()  # set planet and ready -> prev & curr pos in Planet
     movement.moveOnLine()   # move to first node
+    planet.add_path(((planet.position[0][0], planet.position[0][1]), Direction( int((180 + planet.position[1].value) % 360))),
+                    ((planet.position[0][0], planet.position[0][1]), Direction( int((180 + planet.position[1].value) % 360))), - 1)
+            # block first path
+    print('prevDir: ' + str(planet.position[1].value)); time.sleep(5)
     for paths in movement.findPathsOdometry(planet.position[1].value):  # robot searches for next paths -> send to Planet
-        planet.discover_paths(((planet.position[0][0], planet.position[0][1]), Direction(paths)))  # Direction(int(input('nodeDirection: ')))
+        planet.discover_paths(((planet.position[0][0], planet.position[0][1]), Direction(int(paths))))
     prevDir = planet.position[1].value
+    # planet.unexplored_nodes.remove((planet.position[0][0], planet.position[0][1]))
     planet.intelligent_search()  # calc next path by Planet (intelligent search)
     while not comm.end_exploration:
         print('unexplored paths: ' + str(planet.unexplored_paths))
         print('unexplored nodes: ' + str(planet.unexplored_nodes))
-        comm.path_select_and_result_handler(select={'Xs': planet.position[0][0],
-                                        'Ys': planet.position[0][1],
-                                        'Ds': planet.position[1].value})
-                # send next path wanted and handle results -> send to Planet
+        comm.path_select_and_result_handler(select={'Xs': int(planet.position[0][0]),
+                                                    'Ys': int(planet.position[0][1]),
+                                                    'Ds': int(planet.position[1].value)})
+        # send next path wanted and handle results -> send to Planet
         planet.intelligent_search()
         movement.changeDirectionAbsolut(prevDir, planet.position[1].value)
         movement.moveOnLine()   # Robot gets next path from Planet (check if target available/server/else) and goes there
@@ -72,29 +78,28 @@ def run():
                             planet.position[0][0],
                             planet.position[0][1],
                             movement.status)    # process data from the drive in odometry
-        prevDir = odometry.currentDirection()
-        planet.change_position(((odometry.currentCoordinates()[0], odometry.currentCoordinates()[1]),
-                                Direction(odometry.currentDirection())))
-        '''
-        planet.change_position(((planet.position[0][0], planet.position[0][1]),
-                                Direction(input('newOrientation'))))
-        '''
-        comm.path_and_result_handler(path={'Xs': planet.prev_position[0][0],
-                                      'Ys': planet.prev_position[0][1],
-                                      'Ds': int(planet.prev_position[1]),
-                                      'Xe': planet.position[0][0],
-                                      'Ye': planet.position[0][1],
-                                      'De': (180 + int(planet.position[1])) % 360,
-                                      'pathStatus': movement.status})
-                # send path msg and send result to Planet
-        planet.output_paths()
-
+        prevDir = int(odometry.currentDirection())
+        planet.change_position(((int(odometry.currentCoordinates()[0]), int(odometry.currentCoordinates()[1])),
+                                Direction(int(odometry.currentDirection()))))
+        comm.path_and_result_handler(path={'Xs': int(planet.prev_position[0][0]),
+                                           'Ys': int(planet.prev_position[0][1]),
+                                           'Ds': int(planet.prev_position[1]),
+                                           'Xe': int(planet.position[0][0]),
+                                           'Ye': int(planet.position[0][1]),
+                                           'De': int((180 + int(planet.position[1])) % 360),
+                                           'pathStatus': movement.status})
+        # send path msg and send result to Planet
+        print('prevDir: ' + str(planet.position[1].value)); time.sleep(5)
         for paths in movement.findPathsOdometry(planet.position[1].value):  # robot searches for next paths -> send to Planet
             planet.discover_paths(((planet.position[0][0], planet.position[0][1]),
                                    Direction(paths)))  # Direction(int(input('nodeDirection: ')))
         planet.intelligent_search()  # calc next path by Planet (intelligent search)
         comm.check_exploration_complete()   # check exploration complete or target reached
+        if input('continue? (y/n) ') != 'y':
+            comm.end_exploration = True
     comm.end_communication()  # close communication
+
+
 # DO NOT EDIT
 def signal_handler(sig=None, frame=None, raise_interrupt=True):
     if client and client.is_connected():
