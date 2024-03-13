@@ -76,12 +76,13 @@ class Planet:
                     track = self.shortest_path(start=(self.position[0][0], self.position[0][1]), target=path[0])
                     if track is not None:
                         new_distance = track[len(track) - 1][2]
-                    elif v_min[0] == (self.position[0][0], self.position[0][1]):
+                    elif path[0] == (self.position[0][0], self.position[0][1]):
                         new_distance = 0
                     else:
                         new_distance = float('inf')
                     if distance_min < new_distance and new_distance != float('inf'):
                         v_min = path
+                print()
                 self.change_position(((self.position[0][0], self.position[0][1]), v_min[1]))
                 #except:
                 #    print('Planet.intelligent_search: error with unexplored paths ')
