@@ -73,7 +73,8 @@ class Planet:
                 if (self.position[0][0], self.position[0][1]) == v_min[0]:
                     self.change_position(v_min)
                 else:
-                    self.change_position(((self.position[0][0], self.position[0][1]), self.shortest_path((self.position[0][0], self.position[0][1]), v_min[0])[0][1]))
+                    self.change_position(((self.position[0][0], self.position[0][1]),
+                                          self.shortest_path((self.position[0][0], self.position[0][1]), v_min[0])[0][1]))
             elif len(self.unexplored_nodes) > 0:
                 v_min = self.unexplored_nodes[0]
                 distance_min = self.distance_to((self.position[0][0], self.position[0][1]), v_min)
@@ -87,8 +88,11 @@ class Planet:
                     for nodes in self.unexplored_nodes:
                         self.unexplored_nodes.remove(nodes)
                 else:
-                    self.change_position(((self.position[0][0], self.position[0][1]),
-                                          self.shortest_path((self.position[0][0], self.position[0][1]), v_min)[0][1]))
+                    if (self.position[0][0], self.position[0][1]) == v_min[0]:
+                        self.change_position(v_min)
+                    else:
+                        self.change_position(((self.position[0][0], self.position[0][1]),
+                                              self.shortest_path((self.position[0][0], self.position[0][1]), v_min[0])[0][1]))
             else:
                 print('Planet.intelligent_search: error with unexplored paths ')
 

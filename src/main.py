@@ -47,16 +47,14 @@ def run():
 
     comm = Communication(client, logger)
     planet = Planet()
-    # robot = Robot()
-    odometry = Odometry()
+    movement = Movement()
+    # odometry = Odometry()
     comm.planet = planet
     comm.first_communication()  # set planet and ready -> prev & curr pos in Planet
-    print('move to first node'); time.sleep(1)
-    print('robot searches for next paths -> send to Planet'); time.sleep(1)
-    while input('add another path? (y/n) ').lower() == 'y':
-        planet.discover_paths(((planet.position[0][0],
-                               planet.position[0][1]),
-                              Direction(int(input('nodeDirection: ')))))
+    movement.moveOnLine()   # move to first node
+    for paths in movement.findPathsOdometry(planet.position[1]):  # robot searches for next paths -> send to Planet
+        planet.discover_paths(((planet.position[0][0], planet.position[0][1]), Direction(paths)))  # Direction(int(input('nodeDirection: ')))
+    prevDir = planet.position[1].value
     planet.intelligent_search()  # calc next path by Planet (intelligent search)
     while not comm.end_exploration:
         print('unexplored paths: ' + str(planet.unexplored_paths))
@@ -66,24 +64,34 @@ def run():
                                         'Ds': planet.position[1].value})
                 # send next path wanted and handle results -> send to Planet
         planet.intelligent_search()
-        print('Robot gets next path from Planet (check if target available/server/else) and goes there'); time.sleep(1)
-        print('process data from the drive in odometry'); time.sleep(1)
-        planet.change_position(((int(input('endX: ')), int(input('endY: '))),
-                                Direction((180 + int(input('endOrientation: '))) % 360)))
+        movement.changeDirectionAbsolut(prevDir, planet.position[1])
+        movement.moveOnLine()   # Robot gets next path from Planet (check if target available/server/else) and goes there
+        odometry = Odometry(movement.lWheelDistances,
+                            movement.rWheelDistances,
+                            planet.position[1],
+                            planet.position[0][0],
+                            planet.position[0][1],
+                            movement.status)    # process data from the drive in odometry
+        prevDir = odometry.currentDirection()
+        planet.change_position(((odometry.currentCoordinates()[0], odometry.currentCoordinates()[1]),
+                                Direction(odometry.currentDirection())))
+        '''
+        planet.change_position(((planet.position[0][0], planet.position[0][1]),
+                                Direction(input('newOrientation'))))
+        '''
         comm.path_and_result_handler(path={'Xs': planet.prev_position[0][0],
                                       'Ys': planet.prev_position[0][1],
                                       'Ds': int(planet.prev_position[1]),
                                       'Xe': planet.position[0][0],
                                       'Ye': planet.position[0][1],
                                       'De': (180 + int(planet.position[1])) % 360,
-                                      'pathStatus': input('pathStatus: ')})
+                                      'pathStatus': movement.status})
                 # send path msg and send result to Planet
         planet.output_paths()
-        print('robot searches for next paths -> send to Planet'); time.sleep(1)    # apply odometry after each movement!
-        while input('add another path? (y/n) ').lower() == 'y':
-            planet.discover_paths(((planet.position[0][0],
-                                   planet.position[0][1]),
-                                  Direction(int(input('nodeDirection: ')))))
+
+        for paths in movement.findPathsOdometry(planet.position[1]):  # robot searches for next paths -> send to Planet
+            planet.discover_paths(((planet.position[0][0], planet.position[0][1]),
+                                   Direction(paths)))  # Direction(int(input('nodeDirection: ')))
         planet.intelligent_search()  # calc next path by Planet (intelligent search)
         comm.check_exploration_complete()   # check exploration complete or target reached
     comm.end_communication()  # close communication
