@@ -36,7 +36,7 @@ class Planet:
         """ Initializes the data structure """
         self.paths = {}
         # self.add_path(start=start)
-        self.target = ()
+        self.target = None
         self.position = [[0, 0], Direction.NORTH]
         self.prev_position = []
         self.path_target = []
@@ -63,7 +63,6 @@ class Planet:
             self.change_position((next_node[0], next_node[1]))
         elif not self.is_path_selected:
             if len(self.unexplored_paths) > 0:
-                #try:
                 v_min = self.unexplored_paths[0]
                 distance_min = self.distance_to((self.position[0][0], self.position[0][1]), v_min)
                 for path in self.unexplored_paths:
@@ -71,9 +70,8 @@ class Planet:
                     if distance_min > new_distance:
                         v_min = path
                         distance_min = new_distance
-                self.change_position(((self.position[0][0], self.position[0][1]),
-                                      self.shortest_path((self.position[0][0], self.position[0][1]),
-                                                         v_min)[0][1]))
+                    if
+                self.change_position(((self.position[0][0], self.position[0][1]), self.shortest_path((self.position[0][0], self.position[0][1]), v_min[0])[0][1]))
             elif len(self.unexplored_nodes) > 0:
                 v_min = self.unexplored_nodes[0]
                 distance_min = self.distance_to((self.position[0][0], self.position[0][1]), v_min)
@@ -83,14 +81,14 @@ class Planet:
                         v_min = node
                         distance_min = new_distance
                 if len(self.unexplored_paths) == 0 and self.distance_to((self.position[0][0], self.position[0][1]),
-                                                                        v_min[0]) == float('inf'):
+                                                                        v_min) == float('inf'):
                     for nodes in self.unexplored_nodes:
                         self.unexplored_nodes.remove(nodes)
                 else:
                     self.change_position(((self.position[0][0], self.position[0][1]),
                                           self.shortest_path((self.position[0][0], self.position[0][1]), v_min)[0][1]))
-                #except:
-            #    print('Planet.intelligent_search: error with unexplored paths ')
+            else:
+                print('Planet.intelligent_search: error with unexplored paths ')
 
         self.is_path_selected = False
 
@@ -125,6 +123,8 @@ class Planet:
         :param weight: Integer
         :return: void
         """
+        if self.target is not None and self.shortest_path((self.position[0][0], self.position[0][1]), (self.target[0], self.target[1])) is not None:
+            self.path_target = self.shortest_path((self.position[0][0], self.position[0][1]), (self.target[0], self.target[1]))
         if start in self.unexplored_paths:
             self.unexplored_paths.remove(start)
         if start[0] not in self.paths:

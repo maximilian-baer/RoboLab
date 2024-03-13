@@ -21,8 +21,8 @@ class TestRoboLabCommunication(unittest.TestCase):
         client_id = '013-' + str(uuid.uuid4())  # Replace YOURGROUPID with your group ID
         client = mqtt.Client(client_id=client_id,  # Unique Client-ID to recognize our program
                              clean_session=False,  # We want to be remembered
-                             protocol=mqtt.MQTTv311  # Define MQTT protocol version
-                             )
+                             protocol=mqtt.MQTTv311)  # Define MQTT protocol version
+
 
         # Initialize your data structure here
         self.communication = Communication(client, mock_logger)
