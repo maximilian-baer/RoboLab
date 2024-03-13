@@ -75,7 +75,11 @@ class Odometry:
             xDiff += (math.cos(dirDiff/2) * prevDirX + math.sin(dirDiff/2) * (prevDirY)) * distance / prevDirLength
             yDiff += (math.cos(dirDiff/2) * prevDirY + math.sin(dirDiff/2) * (-prevDirX))  * distance / prevDirLength
 
-        return 1.25 * xDiff, 1.25 * yDiff       # *1.25 because 1 unit is always measured as 70 - 85
+        newDir = self.currentDirection()
+        newDirX = -math.sin(newDir)
+        newDirY = math.cos(newDir)
+        return xDiff + 0.1 * newDirX, yDiff + 0.1 * newDirY      # *1.25 because 1 unit is always measured as 70 - 85
+
 
 
     def directionDifference(self, lDistance, rDistance):

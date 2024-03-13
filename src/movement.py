@@ -80,18 +80,16 @@ class Movement:
             lastPositionC = outC.position
             lastPositionB = outB.position
 
-        #outB.stop()
-        #outC.stop()
-
         if ultrasonicSensor.value() < 150:
             self.status = "blocked"
-            self.rightTurn(190)
+            self.TurnClockwise(175)
+            self.TurnClockwise(15)
             self.moveOnLine()
         else:
             # an Kreuzung angekommen
-            self.moveStraight(0.5)
+            self.moveStraight(0.4)
 
-    def rightTurn(self, degree):
+    def TurnClockwise(self, degree):
         outB = ev3.LargeMotor("outB")
         outC = ev3.LargeMotor("outC")
         outB.reset()
@@ -102,12 +100,18 @@ class Movement:
         outC.stop_action = "brake"
         outB.speed_sp = 100
         outC.speed_sp = -100
+        k = 1.88
+        if degree > 180 and degree < 360:
+            outB.speed_sp = -100
+            outC.speed_sp = 100
+            k = 1.83
+            degree = degree - 180
         outC.command = "run-forever"
         outB.command = "run-forever"
         i = 0
         lastPositionB = 0
         lastPositionC = 0
-        while (outB.position < degree * 1.85 and outC.position < degree * 1.85):
+        while (outB.position < degree * k and outC.position < degree * k):
             #i += (outB.position - lastPositionB)
             self.rWheelDistances.append(dpt * (outC.position - lastPositionC))  # in mm !!!
             self.lWheelDistances.append(dpt * (outB.position - lastPositionB))
@@ -126,8 +130,8 @@ class Movement:
         self.testrWheelDistances = []
         outB.stop_action = "brake"
         outC.stop_action = "brake"
-        outB.speed_sp = 100
-        outC.speed_sp = 100
+        outB.speed_sp = 150
+        outC.speed_sp = 150
         outC.command = "run-forever"
         outB.command = "run-forever"
         i = 0
@@ -251,7 +255,7 @@ class Movement:
 
     def changeDirectionAbsolut(self, prevDir, newDir):
         while prevDir != newDir:
-            self.rightTurn(90)
+            self.TurnClockwise(90)
             prevDir += 90
             prevDir = prevDir % 360
 
