@@ -61,24 +61,28 @@ class Planet:
             next_node = self.path_target.pop()
             self.change_position((next_node[0], next_node[1]))
         elif not self.is_path_selected:
-            if self.exploration_complete():
-                pass
-            else:
+            if not self.exploration_complete():
                 #try:
+                print('unexplored paths: ' + str(self.unexplored_paths))
                 v_min = self.unexplored_paths[0]
                 track = self.shortest_path((self.position[0][0], self.position[0][1]), v_min)
                 if track is not None:
                     distance_min = track[len(track) - 1][2]
-                else:
+                elif v_min[0] == (self.position[0][0], self.position[0][1]):
                     distance_min = 0
+                else:
+                    distance_min = float('inf')
                 for path in self.unexplored_paths:
                     track = self.shortest_path(start=(self.position[0][0], self.position[0][1]), target=path[0])
                     if track is not None:
                         new_distance = track[len(track) - 1][2]
-                    else:
+                    elif path[0] == (self.position[0][0], self.position[0][1]):
                         new_distance = 0
-                    if distance_min < new_distance:
+                    else:
+                        new_distance = float('inf')
+                    if distance_min < new_distance and new_distance != float('inf'):
                         v_min = path
+                print()
                 self.change_position(((self.position[0][0], self.position[0][1]), v_min[1]))
                 #except:
                 #    print('Planet.intelligent_search: error with unexplored paths ')
@@ -97,7 +101,8 @@ class Planet:
 
     def discover_paths(self, node: Tuple[Tuple[int, int], Direction]):
         self.add_path(start=node)
-        self.unexplored_paths.append(node)
+        if node not in self.paths:
+            self.unexplored_paths.append(node)
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction] = None,
