@@ -42,6 +42,7 @@ class Planet:
         self.path_target = []
         self.is_path_selected = False
         self.unexplored_paths = []
+        self.unexplored_nodes = []
 
     def get_direction(self):
         p = self.position[1]
@@ -52,7 +53,7 @@ class Planet:
         gets if exploration is complete
         :return: boolean
         """
-        if len(self.unexplored_paths) == 0:
+        if len(self.unexplored_paths) == 0 and len(self.unexplored_nodes) == 0:
             return True
         return False
 
@@ -61,27 +62,46 @@ class Planet:
             next_node = self.path_target.pop()
             self.change_position((next_node[0], next_node[1]))
         elif not self.is_path_selected:
-            if not self.exploration_complete():
+            if len(self.unexplored_paths) > 0:
                 #try:
                 v_min = self.unexplored_paths[0]
-                # track = self.shortest_path((self.position[0][0], self.position[0][1]), v_min)
                 distance_min = self.distance_to((self.position[0][0], self.position[0][1]), v_min)
                 for path in self.unexplored_paths:
                     new_distance = self.distance_to(start=(self.position[0][0], self.position[0][1]), target=path[0])
                     if distance_min > new_distance:
                         v_min = path
                         distance_min = new_distance
-                self.change_position(((self.position[0][0], self.position[0][1]), v_min[1]))
+                self.change_position(((self.position[0][0], self.position[0][1]),
+                                      self.shortest_path((self.position[0][0], self.position[0][1]),
+                                                         v_min)[0][1]))
+            elif len(self.unexplored_nodes) > 0:
+                v_min = self.unexplored_nodes[0]
+                distance_min = self.distance_to((self.position[0][0], self.position[0][1]), v_min)
+                for node in self.unexplored_nodes:
+                    new_distance = self.distance_to(start=(self.position[0][0], self.position[0][1]), target=node)
+                    if distance_min > new_distance:
+                        v_min = node
+                        distance_min = new_distance
+                if len(self.unexplored_paths) == 0 and self.distance_to((self.position[0][0], self.position[0][1]),
+                                                                        v_min[0]) == float('inf'):
+                    for nodes in self.unexplored_nodes:
+                        self.unexplored_nodes.remove(nodes)
+                else:
+                    self.change_position(((self.position[0][0], self.position[0][1]),
+                                          self.shortest_path((self.position[0][0], self.position[0][1]), v_min)[0][1]))
                 #except:
-                #    print('Planet.intelligent_search: error with unexplored paths ')
+            #    print('Planet.intelligent_search: error with unexplored paths ')
 
         self.is_path_selected = False
 
     def change_position(self, start: Tuple[Tuple[int, int], Direction]):
+        if start in self.unexplored_nodes:
+            self.unexplored_nodes.remove(start[0])
         self.prev_position = self.position
         self.position = [list(start[0]), start[1]]
 
     def receive_target(self, target: Tuple[int, int]):
+        self.unexplored_nodes.append(target)
         if target not in self.paths:
             self.paths[target] = {}
 
@@ -109,6 +129,9 @@ class Planet:
             self.unexplored_paths.remove(start)
         if start[0] not in self.paths:
             self.paths[start[0]] = {}
+            self.unexplored_nodes.append(start[0])
+            if target is not None and target not in self.unexplored_nodes:
+                self.unexplored_nodes.append(target[0])
         if target is not None and target[0] not in self.paths:
             self.paths[target[0]] = {}
         if target is not None:

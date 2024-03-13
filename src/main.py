@@ -58,6 +58,7 @@ def run():
     while not comm.end_exploration:
         planet.intelligent_search()     # calc next path by Planet (intelligent search)
         print('unexplored paths: ' + str(planet.unexplored_paths))
+        print('unexplored nodes: ' + str(planet.unexplored_nodes))
         comm.path_select_and_result_handler(select={'Xs': planet.position[0][0],
                                         'Ys': planet.position[0][1],
                                         'Ds': planet.position[1].value})
