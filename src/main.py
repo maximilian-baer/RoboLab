@@ -64,7 +64,7 @@ def run():
         print('Robot gets next path from Planet (check if target available/server/else) and goes there'); time.sleep(1)
         print('process data from the drive in odometry'); time.sleep(1)
         planet.change_position(((int(input('endX: ')), int(input('endY: '))),
-                                Direction((180 + 90*int(input('endOrientation: '))) % 360)))
+                                Direction((180 + int(input('endOrientation: '))) % 360)))
         print('robot searches for next paths -> send to Planet'); time.sleep(1)    # apply odometry after each movement!
         while input('add another path? (y/n) ').lower() == 'y':
             planet.discover_paths(((planet.position[0][0],
@@ -75,7 +75,7 @@ def run():
                                       'Ds': int(planet.prev_position[1]),
                                       'Xe': planet.position[0][0],
                                       'Ye': planet.position[0][1],
-                                      'De': (180 + 90*int(planet.position[1])) % 360,
+                                      'De': (180 + int(planet.position[1])) % 360,
                                       'pathStatus': input('pathStatus: ')})
                 # send path msg and send result to Planet or end exploration
         planet.output_paths()
