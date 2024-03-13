@@ -14,6 +14,7 @@ import threading
 from communication import Communication
 from odometry import Odometry
 from planet import Direction, Planet
+from movement import Movement
 
 client = None  # DO NOT EDIT
 
@@ -43,6 +44,7 @@ def run():
 
     # THE EXECUTION OF ALL CODE SHALL BE STARTED FROM WITHIN THIS FUNCTION.
     # ADD YOUR OWN IMPLEMENTATION HEREAFTER.
+
     comm = Communication(client, logger)
     planet = Planet()
     # robot = Robot()
@@ -85,7 +87,6 @@ def run():
         planet.intelligent_search()  # calc next path by Planet (intelligent search)
         comm.check_exploration_complete()   # check exploration complete or target reached
     comm.end_communication()  # close communication
-
 # DO NOT EDIT
 def signal_handler(sig=None, frame=None, raise_interrupt=True):
     if client and client.is_connected():
@@ -102,3 +103,5 @@ if __name__ == '__main__':
     except Exception as e:
         signal_handler(raise_interrupt=False)
         raise e
+
+
