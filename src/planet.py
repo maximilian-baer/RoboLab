@@ -36,7 +36,7 @@ class Planet:
         """ Initializes the data structure """
         self.paths = {}
         # self.add_path(start=start)
-        self.targets = []
+        self.target = ()
         self.position = [[0, 0], Direction.NORTH]
         self.prev_position = []
         self.path_target = []
@@ -244,9 +244,8 @@ class Planet:
         gets if bot is on a target
         :return: boolean
         """
-        for target in self.targets:
-            if self.position == list(target):
-                return True
+        if self.position[0] == list(self.target):
+            return True
         return False
 
     @staticmethod
@@ -272,9 +271,18 @@ class Planet:
             neighbours.append(neighbour)
         return neighbours
 
+    def distance_to(self, start, target):
+        track = self.shortest_path(start=start, target=target)
+        distance = 0
+        for v in track:
+            distance += self.paths[v[0]][v[1]][2]
+        return distance
+
+
+
     # DO NOT EDIT THE METHOD SIGNATURE
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[
-        List[Tuple[Tuple[int, int], Direction, int]]]:
+        List[Tuple[Tuple[int, int], Direction]]]:
         """
         Returns a shortest path between two nodes
 
@@ -322,12 +330,11 @@ class Planet:
                     distances[w[0]] = new_distance
                     prev_node[w[0]] = v
         # backtracking
-        track.append((target, None, distances[target]))
         current_node = target
         while current_node != start:
             for direction in self.paths[prev_node[current_node]]:
                 if self.paths[prev_node[current_node]][direction][0] == current_node:
-                    track.append((prev_node[current_node], direction, distances[prev_node[current_node]]))
+                    track.append((prev_node[current_node], direction))
             current_node = prev_node[current_node]
         track.reverse()
         return track
