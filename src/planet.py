@@ -63,26 +63,14 @@ class Planet:
         elif not self.is_path_selected:
             if not self.exploration_complete():
                 #try:
-                print('unexplored paths: ' + str(self.unexplored_paths))
                 v_min = self.unexplored_paths[0]
-                track = self.shortest_path((self.position[0][0], self.position[0][1]), v_min)
-                if track is not None:
-                    distance_min = track[len(track) - 1][2]
-                elif v_min[0] == (self.position[0][0], self.position[0][1]):
-                    distance_min = 0
-                else:
-                    distance_min = float('inf')
+                # track = self.shortest_path((self.position[0][0], self.position[0][1]), v_min)
+                distance_min = self.distance_to((self.position[0][0], self.position[0][1]), v_min)
                 for path in self.unexplored_paths:
-                    track = self.shortest_path(start=(self.position[0][0], self.position[0][1]), target=path[0])
-                    if track is not None:
-                        new_distance = track[len(track) - 1][2]
-                    elif path[0] == (self.position[0][0], self.position[0][1]):
-                        new_distance = 0
-                    else:
-                        new_distance = float('inf')
-                    if distance_min < new_distance and new_distance != float('inf'):
+                    new_distance = self.distance_to(start=(self.position[0][0], self.position[0][1]), target=path[0])
+                    if distance_min > new_distance:
                         v_min = path
-                print()
+                        distance_min = new_distance
                 self.change_position(((self.position[0][0], self.position[0][1]), v_min[1]))
                 #except:
                 #    print('Planet.intelligent_search: error with unexplored paths ')
@@ -97,11 +85,11 @@ class Planet:
         if target not in self.paths:
             self.paths[target] = {}
 
-        self.targets.append(target)
+        self.target = target
 
     def discover_paths(self, node: Tuple[Tuple[int, int], Direction]):
-        self.add_path(start=node)
-        if node not in self.paths:
+        if node[1] not in self.paths[node[0]] and node not in self.unexplored_paths:
+            self.add_path(start=node)
             self.unexplored_paths.append(node)
 
     # DO NOT EDIT THE METHOD SIGNATURE
@@ -249,7 +237,7 @@ class Planet:
         gets if bot is on a target
         :return: boolean
         """
-        if self.position[0] == list(self.target):
+        if self.position[0] == self.target:
             return True
         return False
 
@@ -279,6 +267,8 @@ class Planet:
     def distance_to(self, start, target):
         track = self.shortest_path(start=start, target=target)
         distance = 0
+        if track is None:
+            return float('inf')
         for v in track:
             distance += self.paths[v[0]][v[1]][2]
         return distance

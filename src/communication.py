@@ -67,13 +67,6 @@ class Communication:
                           path['Xe'], path['Ye'], path['De'],
                           path['pathStatus'])  # send path taken
         self.listen()  # handle results
-        if self.planet.on_target():
-            self.message_target_reached(self.expl, 'Target reached Message')
-            self.end_exploration = True  # breaking condition
-        elif self.planet.exploration_complete():
-            self.message_exploration_completed(self.expl, 'Exploration complete Message')
-            self.end_exploration = True     # breaking condition
-        self.listen()  # handle results
 
     def path_select_and_result_handler(self, select: dict):
         """
@@ -85,6 +78,20 @@ class Communication:
                             select['Xs'],
                             select['Ys'],
                             select['Ds'])  # send path wanting to take
+        self.listen()  # handle results
+
+    def check_exploration_complete(self):
+        """
+        checkfor if planet.exploration_complete or .target_reached is True
+        :param select: Dict with next node {"Xs": _, "Ys": _, "Ds": _}
+        :return: void
+        """
+        if self.planet.on_target():
+            self.message_target_reached(self.expl, 'Target reached Message')
+            self.end_exploration = True  # breaking condition
+        elif self.planet.exploration_complete():
+            self.message_exploration_completed(self.expl, 'Exploration complete Message')
+            self.end_exploration = True     # breaking condition
         self.listen()  # handle results
 
     def message_handler(self, message: dict):
