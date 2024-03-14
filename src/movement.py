@@ -80,7 +80,7 @@ class Movement:
             self.moveOnLine()
         else:
             # an Kreuzung angekommen
-            self.moveStraight(7.5)
+            self.moveStraight(8.5)
 
     def TurnClockwise(self, degree):
         outB = ev3.LargeMotor("outB")
@@ -97,7 +97,7 @@ class Movement:
         if degree > 180 and degree < 360:
             outB.speed_sp = -100
             outC.speed_sp = 100
-            k = 1.83
+            k = 1.82
             degree = degree - 180
         outC.command = "run-forever"
         outB.command = "run-forever"
@@ -241,14 +241,12 @@ class Movement:
         self.changeDirectionAbsolut(direction, prevdir)
 
         print(paths)
+        self.TurnClockwise(10)
         return paths
 
 
     def changeDirectionAbsolut(self, prevDir, newDir):
-        while prevDir != newDir:
-            self.TurnClockwise(90)
-            prevDir += 90
-            prevDir = prevDir % 360
+        self.TurnClockwise((newDir - prevDir) % 360)
 
 
 

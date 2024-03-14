@@ -78,7 +78,7 @@ class Odometry:
         newDir = self.currentDirection()
         newDirX = -math.sin(newDir)
         newDirY = math.cos(newDir)
-        return xDiff + 0.1 * newDirX, yDiff + 0.1 * newDirY      # *1.25 because 1 unit is always measured as 70 - 85
+        return xDiff * 1.2 + 0.1 * newDirX, 1.2 * yDiff + 0.1 * newDirY      # *1.25 because 1 unit is always measured as 70 - 85
 
 
 

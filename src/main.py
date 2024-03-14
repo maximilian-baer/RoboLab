@@ -60,10 +60,12 @@ def run():
     for paths in movement.findPathsOdometry(planet.position[1].value):  # robot searches for next paths -> send to Planet
         planet.discover_paths(((planet.position[0][0], planet.position[0][1]), Direction(int(paths))))
     prevDir = planet.position[1].value
+    planet.node_explored(((planet.position[0][0], planet.position[0][1]), planet.position[1]))
     planet.intelligent_search()  # calc next path by Planet (intelligent search)
     while not comm.end_exploration:
         print('unexplored paths: ' + str(planet.unexplored_paths))
         print('unexplored nodes: ' + str(planet.unexplored_nodes))
+        print('explored nodes: ' + str(planet.explored_nodes))
         comm.path_select_and_result_handler(select={'Xs': int(planet.position[0][0]),
                                                     'Ys': int(planet.position[0][1]),
                                                     'Ds': int(planet.position[1].value)})
@@ -88,9 +90,14 @@ def run():
                                            'De': int((180 + int(planet.position[1])) % 360),
                                            'pathStatus': movement.status})
         # send path msg and send result to Planet
-        for paths in movement.findPathsOdometry(planet.position[1].value):  # robot searches for next paths -> send to Planet
-            planet.discover_paths(((planet.position[0][0], planet.position[0][1]),
-                                   Direction(paths)))  # Direction(int(input('nodeDirection: ')))
+        print('unexplored paths: ' + str(planet.unexplored_paths))
+        print('unexplored nodes: ' + str(planet.unexplored_nodes))
+        print('explored nodes: ' + str(planet.explored_nodes))
+        if (planet.position[0][0], planet.position[0][1]) in planet.unexplored_nodes:
+            for paths in movement.findPathsOdometry(planet.position[1].value):  # robot searches for next paths -> send to Planet
+                planet.discover_paths(((planet.position[0][0], planet.position[0][1]),
+                                       Direction(paths)))  # Direction(int(input('nodeDirection: ')))
+        planet.node_explored(((planet.position[0][0], planet.position[0][1]), planet.position[1]))
         planet.intelligent_search()  # calc next path by Planet (intelligent search)
         comm.check_exploration_complete()   # check exploration complete or target reached
         if input('continue? (y/n) ') == 'n':
