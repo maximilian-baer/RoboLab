@@ -6,7 +6,7 @@ import time
 # a = 118       # space between wheels in mm, 11,8 cm, measured from mid to mid, 9 inbetween, one wheel width = 2,8
 a = 90
 class Odometry:
-    def __init__(self, lwheeldistances, rwheeldistances, prevdir, prevx=0, prevy=0, pathstatus="free"):
+    def __init__(self, lwheeldistances=[], rwheeldistances=[], prevdir=0, prevx=0, prevy=0, pathstatus="free"):
         # Initializes odometry module
         self.lValues = lwheeldistances
         self.rValues = rwheeldistances

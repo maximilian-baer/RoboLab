@@ -47,12 +47,14 @@ def run():
 
     comm = Communication(client, logger)
     planet = Planet()
-    # robot = Robot()
+    robot = Movement()
     odometry = Odometry()
     comm.planet = planet
     comm.first_communication()  # set planet and ready -> prev & curr pos in Planet
     print('move to first node'); time.sleep(1)
+    robot.moveOnLine()
     print('robot searches for next paths -> send to Planet'); time.sleep(1)
+
     while input('add another path? (y/n) ').lower() == 'y':
         planet.discover_paths(((planet.position[0][0],
                                planet.position[0][1]),
@@ -87,6 +89,8 @@ def run():
         planet.intelligent_search()  # calc next path by Planet (intelligent search)
         comm.check_exploration_complete()   # check exploration complete or target reached
     comm.end_communication()  # close communication
+
+
 # DO NOT EDIT
 def signal_handler(sig=None, frame=None, raise_interrupt=True):
     if client and client.is_connected():

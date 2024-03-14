@@ -1,6 +1,7 @@
 import ev3dev.ev3 as ev3
 import time
 from odometry import Odometry
+from planet import Planet
 
 dpt = 0.48      # distance per tick
 
@@ -10,10 +11,6 @@ class Movement:
         self.black = 1.5  # (30, 75, 75)
         self.rWheelDistances = []
         self.lWheelDistances = []
-
-        self.testlWheelDistances = []
-        self.testrWheelDistances = []
-
         self.status = "free"
 
     def moveOnLine(self):
@@ -22,8 +19,8 @@ class Movement:
 
         offset = (self.white + self.black) / 2
         Kp = 3      # calibrated
-        Ki = 0.05               # (for now)
-        Kd = 4      # calibrated
+        Ki = 0.07               # (for now)
+        Kd = 4.5      # calibrated
         Tp = 180
         lastError = 0
         integral = 0
@@ -61,10 +58,6 @@ class Movement:
             """if abs(power_B - power_C) < 40:
                 power_B = 200
                 power_C = 200"""
-            #outB.reset()
-            #outC.reset()
-            #outB.stop_action = "coast"
-            #outC.stop_action = "coast"
             outB.speed_sp = power_B
             outC.speed_sp = power_C
 
@@ -87,7 +80,7 @@ class Movement:
             self.moveOnLine()
         else:
             # an Kreuzung angekommen
-            self.moveStraight(0.4)
+            self.moveStraight(7.5)
 
     def TurnClockwise(self, degree):
         outB = ev3.LargeMotor("outB")
@@ -100,7 +93,7 @@ class Movement:
         outC.stop_action = "brake"
         outB.speed_sp = 100
         outC.speed_sp = -100
-        k = 1.88
+        k = 1.9
         if degree > 180 and degree < 360:
             outB.speed_sp = -100
             outC.speed_sp = 100
@@ -112,16 +105,14 @@ class Movement:
         lastPositionB = 0
         lastPositionC = 0
         while (outB.position < degree * k and outC.position < degree * k):
-            #i += (outB.position - lastPositionB)
             self.rWheelDistances.append(dpt * (outC.position - lastPositionC))  # in mm !!!
             self.lWheelDistances.append(dpt * (outB.position - lastPositionB))
             lastPositionC = outC.position
             lastPositionB = outB.position
-            #time.sleep(0.1)
         outB.stop()
         outC.stop()
 
-    def moveStraight(self, rotNum):
+    def moveStraight(self, cm):
         outB = ev3.LargeMotor("outB")
         outC = ev3.LargeMotor("outC")
         outB.reset()
@@ -137,7 +128,7 @@ class Movement:
         i = 0
         lastPositionB = 0
         lastPositionC = 0
-        while (outB.position < rotNum * 360 and outC.position < rotNum * 360):
+        while (outB.position < cm * 10 / dpt and outC.position < cm * 10 / dpt):
             # i += (outB.position - lastPositionB)
             self.testrWheelDistances.append(dpt * (outC.position - lastPositionC))  # in mm !!!
             self.testlWheelDistances.append(dpt * (outB.position - lastPositionB))
