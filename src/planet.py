@@ -72,10 +72,6 @@ class Planet:
                     if distance_min > new_distance:
                         v_min = path
                         distance_min = new_distance
-<<<<<<< HEAD
-
-                self.change_position(((self.position[0][0], self.position[0][1]), self.shortest_path((self.position[0][0], self.position[0][1]), v_min[0])[0][1]))
-=======
                 if (self.position[0][0], self.position[0][1]) == v_min[0]:
                     self.change_position(v_min)
                 elif self.shortest_path((self.position[0][0], self.position[0][1]), v_min[0]) is None:
@@ -86,7 +82,7 @@ class Planet:
                 else:
                     self.change_position(((self.position[0][0], self.position[0][1]),
                                           self.shortest_path((self.position[0][0], self.position[0][1]), v_min[0])[0][1]))
->>>>>>> 8574a4a7ad831af8773c82d1e1d69588e496efbf
+
             elif len(self.unexplored_nodes) > 0:
                 print('unexplored paths: ' + str(self.unexplored_paths))
                 print('unexplored nodes found: ' + str(self.unexplored_nodes))
