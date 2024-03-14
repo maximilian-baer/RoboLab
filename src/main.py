@@ -60,7 +60,6 @@ def run():
     for paths in movement.findPathsOdometry(planet.position[1].value):  # robot searches for next paths -> send to Planet
         planet.discover_paths(((planet.position[0][0], planet.position[0][1]), Direction(int(paths))))
     prevDir = planet.position[1].value
-    # planet.unexplored_nodes.remove((planet.position[0][0], planet.position[0][1]))
     planet.intelligent_search()  # calc next path by Planet (intelligent search)
     while not comm.end_exploration:
         print('unexplored paths: ' + str(planet.unexplored_paths))
@@ -69,9 +68,9 @@ def run():
                                                     'Ys': int(planet.position[0][1]),
                                                     'Ds': int(planet.position[1].value)})
         # send next path wanted and handle results -> send to Planet
-        planet.intelligent_search()
+        planet.intelligent_search()     # check if target available/server select/else
         movement.changeDirectionAbsolut(prevDir, planet.position[1].value)
-        movement.moveOnLine()   # Robot gets next path from Planet (check if target available/server/else) and goes there
+        movement.moveOnLine()   # Robot gets next path from Planet and goes there
         odometry = Odometry(movement.lWheelDistances,
                             movement.rWheelDistances,
                             planet.position[1].value,
@@ -89,13 +88,12 @@ def run():
                                            'De': int((180 + int(planet.position[1])) % 360),
                                            'pathStatus': movement.status})
         # send path msg and send result to Planet
-        print('prevDir: ' + str(planet.position[1].value)); time.sleep(5)
         for paths in movement.findPathsOdometry(planet.position[1].value):  # robot searches for next paths -> send to Planet
             planet.discover_paths(((planet.position[0][0], planet.position[0][1]),
                                    Direction(paths)))  # Direction(int(input('nodeDirection: ')))
         planet.intelligent_search()  # calc next path by Planet (intelligent search)
         comm.check_exploration_complete()   # check exploration complete or target reached
-        if input('continue? (y/n) ') != 'y':
+        if input('continue? (y/n) ') == 'n':
             comm.end_exploration = True
     comm.end_communication()  # close communication
 
