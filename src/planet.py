@@ -34,18 +34,14 @@ class Planet:
     # DO NOT EDIT THE METHOD SIGNATURE
     def __init__(self):
         """ Initializes the data structure """
-        self.next_path = None
         self.explored_nodes = []
         self.paths = {}
-        # self.add_path(start=start)
         self.target = None
         self.position = [[0, 0], Direction.NORTH]
         self.prev_position = []
         self.path_target = []
-        # self.is_path_selected = False
         self.unexplored_paths = []
         self.unexplored_nodes = []
-        self.path_to_target = False
 
     def get_direction(self):
         p = self.position[1]
@@ -67,7 +63,7 @@ class Planet:
             print('path: ', self.path_target)
             next_node = self.path_target.pop(0)
             self.change_position((next_node[0], next_node[1]))
-        else:   # elif not self.is_path_selected:
+        else:
             if len(self.unexplored_paths) > 0 and self.unexplored_paths_reachable():
                 print('unexplored paths found: ' + str(self.unexplored_paths))
                 v_min = self.unexplored_paths[0]
@@ -122,8 +118,6 @@ class Planet:
             else:
                 print('Planet.intelligent_search: no unexorabled entities left: nodes: ' + str(
                     self.unexplored_nodes) + ' , paths: ' + str(self.unexplored_paths))
-
-        # self.is_path_selected = False
         print('stop intelligent search... ')
 
     def change_position(self, start: Tuple[Tuple[int, int], Direction]):
@@ -131,7 +125,7 @@ class Planet:
         self.position = [list(start[0]), start[1]]
 
     def receive_target(self, target: Tuple[int, int]):
-        if target not in self.unexplored_nodes:
+        if target not in self.unexplored_nodes and target not in self.explored_nodes:
             self.unexplored_nodes.append(target)
         if target not in self.paths:
             self.paths[target] = {}
@@ -165,6 +159,8 @@ class Planet:
         print('adding path: ' + str(start) + ' -> ' + str(target))
 
         if self.target is not None and self.shortest_path((self.position[0][0], self.position[0][1]), (self.target[0], self.target[1])) is not None:
+            print('add target path: ' + str((self.position[0][0], self.position[0][1])) + ' -> ' + str(self.target) +
+                  'with weight: ' + str(self.distance_to((self.position[0][0], self.position[0][1]), (self.target[0], self.target[1]))))
             self.path_target = self.shortest_path((self.position[0][0], self.position[0][1]), (self.target[0], self.target[1]))
         if (start in self.path_target or target in self.path_target) and weight == -1:
             self.path_target = []
@@ -173,9 +169,8 @@ class Planet:
             self.paths[start[0]] = {}
         if start in self.unexplored_paths and target is not None:
             self.unexplored_paths.remove(start)
-        if target is not None and target[0] not in self.explored_nodes:
-            if target[0] not in self.unexplored_nodes:
-                self.unexplored_nodes.append(target[0])
+        if target is not None and target[0] not in self.explored_nodes and target[0] not in self.unexplored_nodes:
+            self.unexplored_nodes.append(target[0])
         if target is not None and target in self.unexplored_paths:
             self.unexplored_paths.remove(target)
         if target is not None and target[0] not in self.paths:
@@ -203,7 +198,6 @@ class Planet:
         :param startDirection: Int
         :return: void
         """
-        # self.is_path_selected = True
         print(startDirection); time.sleep(5)
         self.change_position(((self.position[0][0], self.position[0][1]), Direction(int(startDirection))))
 
@@ -243,7 +237,7 @@ class Planet:
         if target[0] not in self.unexplored_nodes and target[0] not in self.explored_nodes:
             self.unexplored_nodes.append(target[0])
 
-    def add_target(self, targetX, targetY):
+    def change_target(self, targetX, targetY):
         """
         adds new Target to Target-list
         :param targetX: Int

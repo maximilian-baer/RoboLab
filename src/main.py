@@ -83,7 +83,7 @@ def run():
         planet.change_position(((int(odometry.currentCoordinates()[0]), int(odometry.currentCoordinates()[1])),
                                 Direction(int(odometry.currentDirection()))))
         prevDir = planet.position[1].value
-        print('newPrevDir: ' + str(prevDir) + 'planetOrientation: ' + str(planet.position[1].value))
+        print('newPrevDir: ' + str(prevDir) + ' , planetOrientation: ' + str(planet.position[1].value))
         comm.path_and_result_handler(path={'Xs': int(planet.prev_position[0][0]),
                                            'Ys': int(planet.prev_position[0][1]),
                                            'Ds': int(planet.prev_position[1]),

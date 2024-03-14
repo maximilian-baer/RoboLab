@@ -133,8 +133,8 @@ class Communication:
                                           message["payload"]["pathStatus"],
                                           message["payload"]["pathWeight"])
             elif message["type"] == "target":
-                self.planet.add_target(message["payload"]["targetX"],
-                                       message["payload"]["targetY"])
+                self.planet.change_target(message["payload"]["targetX"],
+                                          message["payload"]["targetY"])
             else:
                 print("Communication.message_handler: error while receiving message")
 
