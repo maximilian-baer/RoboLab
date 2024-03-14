@@ -43,10 +43,6 @@ class Planet:
         self.unexplored_paths = []
         self.unexplored_nodes = []
 
-    def get_direction(self):
-        p = self.position[1]
-        return p.value
-
     def exploration_complete(self) -> bool:
         """
         gets if exploration is complete
@@ -158,6 +154,7 @@ class Planet:
         """
         print('adding path: ' + str(start) + ' -> ' + str(target))
 
+        # target is not None and
         if self.target is not None and self.shortest_path((self.position[0][0], self.position[0][1]), (self.target[0], self.target[1])) is not None:
             print('add target path: ' + str((self.position[0][0], self.position[0][1])) + ' -> ' + str(self.target) +
                   'with weight: ' + str(self.distance_to((self.position[0][0], self.position[0][1]), (self.target[0], self.target[1]))))
@@ -165,14 +162,14 @@ class Planet:
         if (start in self.path_target or target in self.path_target) and weight == -1:
             self.path_target = []
             print('reset path_target')
-        if start[0] not in self.paths:
-            self.paths[start[0]] = {}
         if start in self.unexplored_paths and target is not None:
             self.unexplored_paths.remove(start)
-        if target is not None and target[0] not in self.explored_nodes and target[0] not in self.unexplored_nodes:
-            self.unexplored_nodes.append(target[0])
+        # if target is not None and target[0] not in self.explored_nodes and target[0] not in self.unexplored_nodes:
+        #     self.unexplored_nodes.append(target[0])
         if target is not None and target in self.unexplored_paths:
             self.unexplored_paths.remove(target)
+        if start[0] not in self.paths:
+            self.paths[start[0]] = {}
         if target is not None and target[0] not in self.paths:
             self.paths[target[0]] = {}
         if target is not None:
@@ -198,8 +195,8 @@ class Planet:
         :param startDirection: Int
         :return: void
         """
-        print(startDirection); time.sleep(5)
-        self.change_position(((self.position[0][0], self.position[0][1]), Direction(int(startDirection))))
+        if not (len(self.path_target) > 0):
+            self.change_position(((self.position[0][0], self.position[0][1]), Direction(int(startDirection))))
 
     def path_correction(self, startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight):
         """
