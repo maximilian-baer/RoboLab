@@ -241,7 +241,7 @@ class Movement:
         self.changeDirectionAbsolut(direction, prevdir)
 
         print(paths)
-        self.TurnClockwise(10)
+        self.TurnClockwise(5)
         return paths
 
 
