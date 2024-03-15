@@ -58,13 +58,11 @@ class TestRoboLabPlanet(unittest.TestCase):
         self.planet.add_path(start=((1, 1), Direction.EAST), target=((3, 1), Direction.WEST), weight=6)
         self.planet.add_path(start=((1, 1), Direction.SOUTH), target=((1, 4), Direction.NORTH), weight=2)
         self.planet.add_path(start=((1, 4), Direction.EAST), target=((3, 1), Direction.SOUTH), weight=3)
-        self.planet.add_path(start=((3, 1), Direction.EAST), target=((5, 1), Direction.WEST), weight=4)
-        self.planet.add_path(start=((3, 1), Direction.NORTH), target=((4, 3), Direction.NORTH), weight=1)
-        self.planet.add_path(start=((5, 1), Direction.SOUTH), target=((5, 5), Direction.NORTH), weight=5)
+        self.planet.add_path(start=((3, 1), Direction.NORTH), target=((5, 1), Direction.WEST), weight=4)
+        self.planet.add_path(start=((3, 1), Direction.EAST), target=((4, 3), Direction.NORTH), weight=1)
+        self.planet.add_path(start=((5, 1), Direction.SOUTH), target=((5, 5), Direction.EAST), weight=5)
         self.planet.add_path(start=((1, 4), Direction.SOUTH), target=((5, 5), Direction.WEST), weight=4)
-        self.planet.add_path(start=((4, 3), Direction.SOUTH), target=((5, 5), Direction.SOUTH), weight=4)
-        self.planet.add_path(start=((1, 1), Direction.NORTH), target=((1, 1), Direction.WEST), weight=4)
-        self.planet.add_path(start=((1, 1), Direction.NORTH), target=((1, 1), Direction.WEST), weight=5)
+        self.planet.add_path(start=((4, 3), Direction.SOUTH), target=((5, 5), Direction.NORTH), weight=4)
         # self.planet.add_path(...)
 
     def test_integrity(self):
@@ -94,8 +92,8 @@ class TestRoboLabPlanet(unittest.TestCase):
         This test should check that a target outside the map or at an unexplored node is not reachable
         """
         self.planet.add_path(start=((1, 4), Direction.SOUTH), target=((5, 5), Direction.WEST), weight=-1)
-        self.planet.add_path(start=((4, 3), Direction.SOUTH), target=((5, 5), Direction.SOUTH), weight=-1)
-        self.planet.add_path(start=((1, 1), Direction.NORTH), target=((1, 1), Direction.WEST), weight=-1)
+        self.planet.add_path(start=((4, 3), Direction.SOUTH), target=((5, 5), Direction.NORTH), weight=-1)
+        self.planet.add_path(start=((5, 1), Direction.SOUTH), target=((5, 5), Direction.EAST), weight=-1)
         print(self.planet.shortest_path((1, 1), (5, 5)) is None)
 
     def test_same_length(self):
@@ -105,7 +103,7 @@ class TestRoboLabPlanet(unittest.TestCase):
 
         Requirement: Minimum of two paths with same cost exists, only one is returned by the logic implemented
         """
-        self.planet.add_path(start=((1, 4), Direction.SOUTH), target=((5, 5), Direction.WEST), weight=9)
+        self.planet.add_path(start=((1, 4), Direction.SOUTH), target=((5, 5), Direction.WEST), weight=8)
         print(self.planet.shortest_path((1, 1), (5, 5)))
 
     def test_target_with_loop(self):
@@ -115,8 +113,7 @@ class TestRoboLabPlanet(unittest.TestCase):
 
         Result: Target is reachable
         """
-        self.planet.add_path(start=((3, 1), Direction.NORTH), target=((3, 1), Direction.NORTH), weight=1)
-        print(self.planet.shortest_path((0, 0), (5, 5)))
+        print(self.planet.shortest_path((1, 1), (5, 5)))
 
     def test_target_not_reachable_with_loop(self):
         """
@@ -126,8 +123,9 @@ class TestRoboLabPlanet(unittest.TestCase):
         Result: Target is not reachable
         """
         self.planet.add_path(start=((1, 4), Direction.SOUTH), target=((5, 5), Direction.WEST), weight=-1)
-        self.planet.add_path(start=((4, 3), Direction.SOUTH), target=((5, 5), Direction.SOUTH), weight=-1)
-        self.planet.add_path(start=((1, 1), Direction.NORTH), target=((1, 1), Direction.WEST), weight=-1)
+        self.planet.add_path(start=((4, 3), Direction.SOUTH), target=((5, 5), Direction.NORTH), weight=-1)
+        self.planet.add_path(start=((5, 1), Direction.SOUTH), target=((5, 5), Direction.EAST), weight=-1)
+        self.planet.add_path(start=((1, 1), Direction.NORTH), target=((1, 1), Direction.WEST), weight=1)
         print(self.planet.shortest_path((0, 0), (5, 5)) is None)
 
 
