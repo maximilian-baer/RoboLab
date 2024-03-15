@@ -168,6 +168,8 @@ class Planet:
         #     self.unexplored_nodes.append(target[0])
         if target is not None and target in self.unexplored_paths:
             self.unexplored_paths.remove(target)
+        if target is not None and target[0] not in self.unexplored_nodes and target[0] not in self.explored_nodes:
+            self.unexplored_nodes.append(target[0])
         if start[0] not in self.paths:
             self.paths[start[0]] = {}
         if target is not None and target[0] not in self.paths:
