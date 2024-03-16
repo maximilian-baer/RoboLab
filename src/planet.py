@@ -43,6 +43,10 @@ class Planet:
         self.unexplored_paths = []
         self.unexplored_nodes = []
 
+        self.color_same_mod2 = None
+        self.color_different_mod2 = None
+
+
     def exploration_complete(self) -> bool:
         """
         gets if exploration is complete
@@ -413,4 +417,13 @@ class Planet:
         print('unexplored paths reachable: ' + str(reachable))
         return reachable
 
-
+    def defineColorIdents(self, color, xValue, yValue):
+        if color == 2 or color == 5:
+            if xValue % 2 == yValue % 2:
+                self.color_same_mod2 = color
+                self.color_different_mod2 = (color + 3) % 6
+            else:
+                self.color_same_mod2 = (color + 3) % 6
+                self.color_different_mod2 = color
+        else:
+            print("Color Idents could not be defined")

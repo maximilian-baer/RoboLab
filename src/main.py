@@ -55,8 +55,11 @@ def run():
     planet.add_path(((planet.position[0][0], planet.position[0][1]), Direction( int((180 + planet.position[1].value) % 360))),
                     ((planet.position[0][0], planet.position[0][1]), Direction( int((180 + planet.position[1].value) % 360))), - 1)
     ev3.Sound.beep()
+    planet.defineColorIdents(movement.endColor, planet.position[0][0], planet.position[0][1])
+    print("same:", planet.color_same_mod2)
+    print("different:", planet.color_different_mod2)
             # block first path
-    print('prevDir: ' + str(planet.position[1].value));
+    print('prevDir: ' + str(planet.position[1].value))
     for paths in movement.findPathsOdometry(planet.position[1].value):  # robot searches for next paths -> send to Planet
         planet.discover_paths(((planet.position[0][0], planet.position[0][1]), Direction(int(paths))))
     prevDir = planet.position[1].value
@@ -80,7 +83,9 @@ def run():
                             planet.position[1].value,
                             planet.position[0][0],
                             planet.position[0][1],
-                            movement.status)    # process data from the drive in odometry
+                            movement.status,
+                            movement.endColor,
+                            planet)    # process data from the drive in odometry
         planet.change_position(((int(odometry.currentCoordinates()[0]), int(odometry.currentCoordinates()[1])),
                                 Direction(int(odometry.currentDirection()))))
         prevDir = planet.position[1].value
@@ -114,6 +119,7 @@ def run():
     print('unexplored nodes: ' + str(planet.unexplored_nodes))
     print('explored nodes: ' + str(planet.explored_nodes))
     comm.end_communication()  # close communication
+
 
 
 # DO NOT EDIT
