@@ -82,7 +82,7 @@ class Communication:
 
     def check_exploration_complete(self):
         """
-        checkfor if planet.exploration_complete or .target_reached is True
+        check if planet.exploration_complete or .on_target is True
         :param select: Dict with next node {"Xs": _, "Ys": _, "Ds": _}
         :return: void
         """

@@ -70,7 +70,7 @@ def run():
                                                     'Ys': int(planet.position[0][1]),
                                                     'Ds': int(planet.position[1].value)})
         # send next path wanted and handle results -> send to Planet
-        # planet.intelligent_search()     # check if target available/server select/else
+        planet.change_prev_position(planet.position)
         movement = Movement()
         print('prevDir: ' + str(prevDir) + ' , planetOrientation: ' + str(planet.position[1].value))
         movement.changeDirectionAbsolut(prevDir, planet.position[1].value)
@@ -109,10 +109,6 @@ def run():
         comm.check_exploration_complete()   # check exploration complete or target reached
         # if input('continue? (y/n) ') == 'n':
         #    comm.end_exploration = True
-
-    print('unexplored paths: ' + str(planet.unexplored_paths))
-    print('unexplored nodes: ' + str(planet.unexplored_nodes))
-    print('explored nodes: ' + str(planet.explored_nodes))
     comm.end_communication()  # close communication
 
 

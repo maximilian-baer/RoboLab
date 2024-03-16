@@ -52,16 +52,85 @@ class Planet:
             return True
         return False
 
+    def shortest_path_to_unexplored_path(self) -> Tuple[Tuple[int, int], Direction]:
+        """
+        gets the next path in track to nearest unexplored path
+        :return: Tuple[Tuple[int, int], Direction] next path
+        """
+        v_min = self.unexplored_paths[0]
+        distance_min = self.distance_to((self.position[0][0], self.position[0][1]), v_min)
+        for path in self.unexplored_paths:
+            new_distance = self.distance_to(start=(self.position[0][0], self.position[0][1]), target=path[0])
+            if distance_min > new_distance:
+                v_min = path
+                distance_min = new_distance
+        # get nearest unexplored node
+        if (self.position[0][0], self.position[0][1]) == v_min[0]:
+            return v_min
+            # return next path if already on nearest path node
+        elif self.shortest_path((self.position[0][0], self.position[0][1]), v_min[0]) is None:
+            print('Planet.shortest_path_to_unexplored_path: shortest_path to unexplored path is None: ' +
+                  str((self.position[0][0], self.position[0][1])) +
+                  ' -> ' +
+                  str(v_min[0]))
+            return None
+        else:
+            return ((self.position[0][0], self.position[0][1]),
+                    self.shortest_path((self.position[0][0], self.position[0][1]), v_min[0])[0][1])
+            # return first path in track to nearest unexplored path
+
+    def shortest_path_to_unexplored_node(self) -> Tuple[Tuple[int, int], Direction]:
+        """
+        gets the next path in track to nearest unexplored node or set exit condition for main
+        :return: Tuple[Tuple[int, int], Direction] next path
+        """
+        v_min = self.unexplored_nodes[0]
+        distance_min = self.distance_to((self.position[0][0], self.position[0][1]), v_min)
+        for node in self.unexplored_nodes:
+            new_distance = self.distance_to(start=(self.position[0][0], self.position[0][1]), target=node)
+            if distance_min > new_distance:
+                v_min = node
+                distance_min = new_distance
+        # get nearest unexplored node
+        print('distance to min unexplored node: ' + str((self.position[0][0], self.position[0][1])) +
+              ' -> ' + str(v_min) + ' = ' +
+              str(self.distance_to((self.position[0][0], self.position[0][1]), v_min)))
+        if self.distance_to((self.position[0][0], self.position[0][1]), v_min) == float('inf'):
+            self.unexplored_nodes = []
+            self.unexplored_paths = []
+            print('killed all paths and nodes')
+            # delete all nodes and paths if unreachable for exit condition in main
+        else:
+            if (self.position[0][0], self.position[0][1]) == v_min:
+                print('Planet.shortest_path_to_unexplored_node: on unexplored node!')
+            elif self.shortest_path((self.position[0][0], self.position[0][1]), v_min[0]) is None:
+                print('Planet.shortest_path_to_unexplored_node: shortest_path to unexplored node is None: ' +
+                      str((self.position[0][0], self.position[0][1])) +
+                      ' -> ' +
+                      str(v_min))
+            else:
+                return ((self.position[0][0], self.position[0][1]),
+                        self.shortest_path((self.position[0][0], self.position[0][1]), v_min)[0][1])
+                # return first path in track to nearest unexplored node
+
     def intelligent_search(self):
+        """
+        sets position for drive if reachable or set exit condition for main
+        :return: void
+        """
         print('start intelligent search... ')
         if len(self.path_target) > 0:
             print('got target path ')
             print('path: ', self.path_target)
             next_node = self.path_target.pop(0)
             self.change_position((next_node[0], next_node[1]))
+            # set next path to path in track to target
         else:
             if len(self.unexplored_paths) > 0 and self.unexplored_paths_reachable():
                 print('unexplored paths found: ' + str(self.unexplored_paths))
+                self.change_position(self.shortest_path_to_unexplored_path())
+                # set next path to path in track to unexplored path
+                '''
                 v_min = self.unexplored_paths[0]
                 distance_min = self.distance_to((self.position[0][0], self.position[0][1]), v_min)
                 for path in self.unexplored_paths:
@@ -80,12 +149,16 @@ class Planet:
                     self.change_position(((self.position[0][0], self.position[0][1]),
                                           self.shortest_path((self.position[0][0], self.position[0][1]), v_min[0])[0][
                                               1]))
+                '''
 
             elif len(self.unexplored_nodes) > 0:
                 print('len(planet.unexplored_paths) = ' + str(len(self.unexplored_paths)))
                 print('planet.unexplored_paths_reachable() = ' + str(self.unexplored_paths_reachable()))
                 print('unexplored paths: ' + str(self.unexplored_paths))
                 print('unexplored nodes found: ' + str(self.unexplored_nodes))
+                self.change_position(self.shortest_path_to_unexplored_node())
+                # set next path to path in track to unexplored node
+                '''
                 v_min = self.unexplored_nodes[0]
                 distance_min = self.distance_to((self.position[0][0], self.position[0][1]), v_min)
                 for node in self.unexplored_nodes:
@@ -93,7 +166,8 @@ class Planet:
                     if distance_min > new_distance:
                         v_min = node
                         distance_min = new_distance
-                print('distance to min unexplored node: ' + str((self.position[0][0], self.position[0][1])) + ' -> ' + str(v_min) +
+                print('distance to min unexplored node: ' + str(
+                    (self.position[0][0], self.position[0][1])) + ' -> ' + str(v_min) +
                       ' = ' + str(self.distance_to((self.position[0][0], self.position[0][1]), v_min)))
                 if self.distance_to((self.position[0][0], self.position[0][1]), v_min) == float('inf'):
                     self.unexplored_nodes = []
@@ -111,16 +185,36 @@ class Planet:
                         self.change_position(((self.position[0][0], self.position[0][1]),
                                               self.shortest_path((self.position[0][0], self.position[0][1]), v_min)[0][
                                                   1]))
+                '''
             else:
-                print('Planet.intelligent_search: no unexorabled entities left: nodes: ' + str(
-                    self.unexplored_nodes) + ' , paths: ' + str(self.unexplored_paths))
+                print('Planet.intelligent_search: no unexorabled entities left: nodes: ' +
+                      str(self.unexplored_nodes) + ' , paths: ' + str(self.unexplored_paths))
         print('stop intelligent search... ')
 
     def change_position(self, start: Tuple[Tuple[int, int], Direction]):
-        self.prev_position = self.position
+        """
+        Change the internal position of the bot
+        :param start: next position of the bot
+        :return: void
+        """
         self.position = [list(start[0]), start[1]]
+        # set next position for drive
+
+    def change_prev_position(self, start: Tuple[Tuple[int, int], Direction]):
+        """
+        Change the previous position of the bot for odometry calc
+        :param start: previous position of the bot
+        :return: void
+        """
+        self.prev_position = [list(start[0]), start[1]]
+        # set prev position before drive
 
     def receive_target(self, target: Tuple[int, int]):
+        """
+        Change the target of the bot and evt add it to unexplored nodes and/or paths
+        :param target: Tuple[int, int]
+        :return: void
+        """
         if target not in self.unexplored_nodes and target not in self.explored_nodes:
             self.unexplored_nodes.append(target)
         if target not in self.paths:
@@ -129,15 +223,41 @@ class Planet:
         self.target = target
 
     def discover_paths(self, node: Tuple[Tuple[int, int], Direction]):
+        """
+        add path to paths and unexplored nodes if they are not already in
+        :param node: Tuple[Tuple[int, int], Direction]
+        :return: void
+        """
         if node[1] not in self.paths[node[0]] and node not in self.unexplored_paths:
             self.add_path(start=node)
             self.unexplored_paths.append(node)
 
     def node_explored(self, node: Tuple[Tuple[int, int], Direction]):
+        """
+        check if node is unexplored and change it to explored
+        :param node: Tuple[Tuple[int, int], Direction]
+        :return: void
+        """
         if node[0] in self.unexplored_nodes and node[0] not in self.explored_nodes:
             self.unexplored_nodes.remove(node[0])
             self.explored_nodes.append(node[0])
 
+    def set_path_to_target(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
+                           weight: int = -1):
+        """
+        set path to target if available or reset
+        :return: void
+        """
+        if self.target is not None and self.shortest_path((self.position[0][0], self.position[0][1]),
+                                                          (self.target[0], self.target[1])) is not None:
+            print('add target path: ' + str((self.position[0][0], self.position[0][1])) + ' -> ' + str(self.target) +
+                  'with weight: ' + str(self.distance_to((self.position[0][0], self.position[0][1]),
+                                                        (self.target[0], self.target[1]))))
+            self.path_target = self.shortest_path((self.position[0][0], self.position[0][1]),
+                                                  (self.target[0], self.target[1]))
+        if (start in self.path_target or target in self.path_target) and weight == -1:
+            self.path_target = []
+            print('reset path_target')
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def add_path(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction] = None,
@@ -154,22 +274,30 @@ class Planet:
         """
         print('adding path: ' + str(start) + ' -> ' + str(target))
 
-        # target is not None and
-        if self.target is not None and self.shortest_path((self.position[0][0], self.position[0][1]), (self.target[0], self.target[1])) is not None:
+        self.set_path_to_target(start, target, weight)
+        '''
+        if self.target is not None and self.shortest_path((self.position[0][0], self.position[0][1]),
+                                                          (self.target[0], self.target[1])) is not None:
             print('add target path: ' + str((self.position[0][0], self.position[0][1])) + ' -> ' + str(self.target) +
-                  'with weight: ' + str(self.distance_to((self.position[0][0], self.position[0][1]), (self.target[0], self.target[1]))))
-            self.path_target = self.shortest_path((self.position[0][0], self.position[0][1]), (self.target[0], self.target[1]))
+                  'with weight: ' + str(
+                self.distance_to((self.position[0][0], self.position[0][1]), (self.target[0], self.target[1]))))
+            self.path_target = self.shortest_path((self.position[0][0], self.position[0][1]),
+                                                  (self.target[0], self.target[1]))
+        
         if (start in self.path_target or target in self.path_target) and weight == -1:
             self.path_target = []
             print('reset path_target')
+        '''
+        # remove start from unexplored paths if target is available -> full path
         if start in self.unexplored_paths and target is not None:
             self.unexplored_paths.remove(start)
-        # if target is not None and target[0] not in self.explored_nodes and target[0] not in self.unexplored_nodes:
-        #     self.unexplored_nodes.append(target[0])
+        # remove target from unexplored paths if target is available -> full path
         if target is not None and target in self.unexplored_paths:
             self.unexplored_paths.remove(target)
+        # add target to unexplored nodes if not already in or explored
         if target is not None and target[0] not in self.unexplored_nodes and target[0] not in self.explored_nodes:
             self.unexplored_nodes.append(target[0])
+        # add path to paths
         if start[0] not in self.paths:
             self.paths[start[0]] = {}
         if target is not None and target[0] not in self.paths:
@@ -212,7 +340,8 @@ class Planet:
         :param pathWeight: Int
         :return: void
         """
-        self.add_path(start=((startX, startY), Direction(startDirection)), target=((endX, endY), Direction(endDirection)), weight=pathWeight)
+        self.add_path(start=((startX, startY), Direction(startDirection)),
+                      target=((endX, endY), Direction(endDirection)), weight=pathWeight)
 
     def path_unveiled(self, startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight):
         """
@@ -288,15 +417,13 @@ class Planet:
         # YOUR CODE FOLLOWS (remove pass, please!)
         return self.paths
 
-    def explore_closest_path(self, start, target):
-        track = self.shortest_path(start, target)
-        if track is None:
-            return
-
     def output_paths(self):
+        """
+        print all paths saved so far
+        :return: void
+        """
         for v in self.paths.keys():
             print(v, self.paths[v])
-
 
     def on_target(self) -> bool:
         """
@@ -338,8 +465,6 @@ class Planet:
         for v in track:
             distance += self.paths[v[0]][v[1]][2]
         return distance
-
-
 
     # DO NOT EDIT THE METHOD SIGNATURE
     def shortest_path(self, start: Tuple[int, int], target: Tuple[int, int]) -> Optional[
@@ -411,5 +536,3 @@ class Planet:
                 break
         print('unexplored paths reachable: ' + str(reachable))
         return reachable
-
-
