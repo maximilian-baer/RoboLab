@@ -187,8 +187,11 @@ class Movement:
         return brightness
 
 
-    def findPathsOdometry(self, prevdir):
-        # self.findLine()
+    def findPathsOdometry(self, firstDir):
+        self.TurnClockwise(180)
+        self.TurnClockwise(10)
+        prevdir = (firstDir + 180) % 360
+        self.findLine()
         done = False
         paths = []
         colorSensor = ev3.ColorSensor()
@@ -246,10 +249,10 @@ class Movement:
             if direction == prevdir:
                 done = True
 
-        self.changeDirectionAbsolut(direction, prevdir)
+        self.changeDirectionAbsolut(direction, firstDir)
 
         print(paths)
-        self.TurnClockwise(5)
+        #self.TurnClockwise(5)
         return paths
 
     def getColor(self):
