@@ -104,6 +104,7 @@ def run():
         print('unexplored nodes: ' + str(planet.unexplored_nodes))
         print('explored nodes: ' + str(planet.explored_nodes))
         print('currOrientation: ' + str(planet.position[1]))
+        print('currPosition: ' + str(planet.position[0]))
         if (planet.position[0][0], planet.position[0][1]) in planet.unexplored_nodes:
             ev3.Sound.beep()
             new_paths = movement.findPathsOdometry(planet.position[1].value)
@@ -111,6 +112,9 @@ def run():
             for paths in new_paths:  # robot searches for next paths -> send to Planet
                 planet.discover_paths(((planet.position[0][0], planet.position[0][1]),
                                        Direction(paths)))
+        else:
+            # movement.findLine()
+            pass
         print('currOrientation: ' + str(planet.position[1]))
         planet.node_explored(((planet.position[0][0], planet.position[0][1]), planet.position[1]))
         planet.change_prev_position(planet.position)
