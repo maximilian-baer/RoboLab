@@ -20,7 +20,7 @@ class Movement:
 
         offset = (self.white + self.black) / 2
         Kp = 3      # calibrated
-        Ki = 0.065               # (for now)
+        Ki = 0.07               # (for now)
         Kd = 4.5      # calibrated
         Tp = 180
         lastError = 0
@@ -86,7 +86,6 @@ class Movement:
             self.moveOnLine()
         else:
             # an Kreuzung angekommen
-            self.TurnClockwise(352)
             self.moveStraight(8)
 
 
