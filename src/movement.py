@@ -74,8 +74,6 @@ class Movement:
             lastPositionC = outC.position
             lastPositionB = outB.position
 
-        print(len(self.lWheelDistances))
-        print(len(self.rWheelDistances))
         self.endColor = self.getColor()
         print("Color: ", self.endColor)
 
@@ -86,6 +84,7 @@ class Movement:
             self.moveOnLine()
         else:
             # an Kreuzung angekommen
+            self.TurnClockwise(352)
             self.moveStraight(8)
 
 
@@ -189,6 +188,7 @@ class Movement:
 
 
     def findPathsOdometry(self, prevdir):
+        # self.findLine()
         done = False
         paths = []
         colorSensor = ev3.ColorSensor()

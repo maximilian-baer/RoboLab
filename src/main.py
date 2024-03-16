@@ -50,6 +50,10 @@ def run():
     planet = Planet()
     movement = Movement()
     comm.planet = planet
+    if input('move awae (y/n) ') == 'y':
+        while True:
+            movement.moveStraight(50)
+            time.sleep(0.1)
     comm.first_communication()  # set planet and ready -> prev & curr pos in Planet
     movement.moveOnLine()   # move to first node
     planet.add_path(((planet.position[0][0], planet.position[0][1]), Direction( int((180 + planet.position[1].value) % 360))),
