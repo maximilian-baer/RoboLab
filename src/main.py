@@ -55,11 +55,9 @@ def run():
     planet.add_path(((planet.position[0][0], planet.position[0][1]), Direction( int((180 + planet.position[1].value) % 360))),
                     ((planet.position[0][0], planet.position[0][1]), Direction( int((180 + planet.position[1].value) % 360))), - 1)
     ev3.Sound.beep()
-            # block first path
-    print('prevDir: ' + str(planet.position[1].value));
+    # block first path
     for paths in movement.findPathsOdometry(planet.position[1].value):  # robot searches for next paths -> send to Planet
         planet.discover_paths(((planet.position[0][0], planet.position[0][1]), Direction(int(paths))))
-    prevDir = planet.position[1].value
     planet.node_explored(((planet.position[0][0], planet.position[0][1]), planet.position[1]))
     planet.intelligent_search()  # calc next path by Planet (intelligent search)
     while not comm.end_exploration:
@@ -70,10 +68,10 @@ def run():
                                                     'Ys': int(planet.position[0][1]),
                                                     'Ds': int(planet.position[1].value)})
         # send next path wanted and handle results -> send to Planet
-        planet.change_prev_position(planet.position)
         movement = Movement()
-        print('prevDir: ' + str(prevDir) + ' , planetOrientation: ' + str(planet.position[1].value))
-        movement.changeDirectionAbsolut(prevDir, planet.position[1].value)
+        print('prevDir: ' + str(planet.prev_position[1]) + ' , planetOrientation: ' + str(planet.position[1]))
+        movement.changeDirectionAbsolut(planet.prev_position[1].value, planet.position[1].value)
+        planet.change_prev_position(((planet.position[0][0], planet.position[0][1]), planet.position[1]))
         movement.moveOnLine()   # Robot gets next path from Planet and goes there
         odometry = Odometry(movement.lWheelDistances,
                             movement.rWheelDistances,
@@ -83,7 +81,6 @@ def run():
                             movement.status)    # process data from the drive in odometry
         planet.change_position(((int(odometry.currentCoordinates()[0]), int(odometry.currentCoordinates()[1])),
                                 Direction(int(odometry.currentDirection()))))
-        prevDir = planet.position[1].value
         comm.path_and_result_handler(path={'Xs': int(planet.prev_position[0][0]),
                                            'Ys': int(planet.prev_position[0][1]),
                                            'Ds': int(planet.prev_position[1]),
@@ -102,14 +99,17 @@ def run():
             print(new_paths)
             for paths in new_paths:  # robot searches for next paths -> send to Planet
                 planet.discover_paths(((planet.position[0][0], planet.position[0][1]),
-                                       Direction(paths)))  # Direction(int(input('nodeDirection: ')))
+                                       Direction(paths)))
         print('currOrientation: ' + str(planet.position[1]))
         planet.node_explored(((planet.position[0][0], planet.position[0][1]), planet.position[1]))
+        planet.change_prev_position(planet.position)
         planet.intelligent_search()  # calc next path by Planet (intelligent search)
         comm.check_exploration_complete()   # check exploration complete or target reached
         # if input('continue? (y/n) ') == 'n':
         #    comm.end_exploration = True
+
     comm.end_communication()  # close communication
+
 
 
 # DO NOT EDIT

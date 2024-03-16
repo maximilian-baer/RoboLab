@@ -318,6 +318,7 @@ class Planet:
         self.add_path(start=((startX, startY), Direction(startOrientation)))
         self.position = [[startX, startY], startOrientation]
         self.change_position(((startX, startY), Direction(int(startOrientation))))
+        self.change_prev_position(((startX, startY), Direction(int(startOrientation))))
 
     def path_select(self, startDirection):
         """
