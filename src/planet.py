@@ -201,8 +201,7 @@ class Planet:
         :param startDirection: Int
         :return: void
         """
-        if not (len(self.path_target) > 0):
-            self.change_position(((self.position[0][0], self.position[0][1]), Direction(int(startDirection))))
+        self.change_position(((self.position[0][0], self.position[0][1]), Direction(int(startDirection))))
 
     def path_correction(self, startX, startY, startDirection, endX, endY, endDirection, pathStatus, pathWeight):
         """
