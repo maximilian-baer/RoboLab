@@ -274,11 +274,18 @@ class Movement:
         outC.reset()
         outB.stop_action = "brake"
         outC.stop_action = "brake"
-        outB.speed_sp = -80
-        outC.speed_sp = 80
 
         colorSensor = ev3.ColorSensor()
         colorSensor.mode = 'RGB-RAW'
+
+        outB.speed_sp = 80
+        outC.speed_sp = -80
+        while (outB.position < 20 and outC.position < 20):
+            outB.run_forever()
+            outC.run_forever()
+
+        outB.speed_sp = -80
+        outC.speed_sp = 80
         rgb = colorSensor.raw
         Lightvalue = self.calc_luminance(rgb[0], rgb[1], rgb[2])
         while(Lightvalue - offset > 5):
