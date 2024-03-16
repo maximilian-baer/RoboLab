@@ -85,7 +85,7 @@ class Movement:
             self.moveOnLine()
         else:
             # an Kreuzung angekommen
-            self.TurnClockwise(352)
+            self.TurnClockwise(350)
             self.moveStraight(8)
 
 
