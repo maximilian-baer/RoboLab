@@ -22,6 +22,11 @@ class Odometry:
 
 
     def currentCoordinates(self):
+        """
+        calculates and rounds the coordinates after a movement using the previous coordinates and the coordinate
+        difference
+        :return: tuple
+        """
         if self.pathStatus == "blocked":
             return self.prevX, self.prevY
         else:
@@ -60,6 +65,10 @@ class Odometry:
         return corrX, corrY
 
     def directionDifferenceOfLine(self):
+        """
+            sums up all the direction differences of the intervalls of one movement/line
+            :return: float
+        """
         dirChange = 0
         for i in range(len(self.lValues)):
             dirChange += self.directionDifference(self.lValues[i], self.rValues[i])
@@ -67,6 +76,11 @@ class Odometry:
 
 
     def currentDirection(self):
+        """
+            calculates the direction after a movement from the previous direction and the direction difference and
+            rounds it
+            :return: int
+        """
         if self.pathStatus == "blocked":
             return (self.prevDirection + 180) % 360
         else:
@@ -85,6 +99,11 @@ class Odometry:
 
 
     def coordinateDifferenceOfLine(self):
+        """
+            calculates the difference in coordinates of one movement/line with the previous direction and the previous
+            coordinates
+            :return: tuple
+        """
         firstPrevDir = 2 * math.pi * ((360 - self.prevDirection) % 360)/360
         firstPrevDirX = -math.sin(firstPrevDir)
         firstPrevDirY = math.cos(firstPrevDir)
@@ -118,13 +137,23 @@ class Odometry:
         return 1.2 * (xDiff + 0.1 * newDirX + 0.1 * firstPrevDirX), 1.2 * (yDiff + 0.1 * newDirY + 0.1 * firstPrevDirY)
 
 
-
     def directionDifference(self, lDistance, rDistance):
+        """
+            calculates direction difference of one intervall
+            :param lDistance: float
+            :param rDistance: float
+            :return: float
+        """
         return (rDistance - lDistance) / a
-        #* 1.2          # * 1.2 is experimental!!! knowing this is always at least 10-40° less per 90°, this is an experimental fix
 
 
     def distance(self, lDistance, rDistance):       # distance for one intervall in mm
+        """
+        calculates distance for one intervall in mm
+        :param lDistance: float
+        :param rDistance: float
+        :return: float
+        """
         if abs(rDistance - lDistance) < 5:
             return (rDistance + lDistance) / 2
         else:

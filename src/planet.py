@@ -104,7 +104,6 @@ class Planet:
             self.unexplored_paths = []
             print('killed all paths and nodes')
             # delete all nodes and paths if unreachable for exit condition in main
-            return tuple(((69, 420), Direction(0)))
         else:
             if (self.position[0][0], self.position[0][1]) == v_min:
                 print('Planet.shortest_path_to_unexplored_node: on unexplored node!')
@@ -154,7 +153,6 @@ class Planet:
         :return: void
         """
         self.position = [list(start[0]), start[1]]
-        # self.set_path_to_target()
         # set next position for drive
 
     def change_prev_position(self, start: Tuple[Tuple[int, int], Direction]):
@@ -199,24 +197,19 @@ class Planet:
             self.unexplored_nodes.remove(node[0])
             self.explored_nodes.append(node[0])
 
-    def set_path_to_target(self, start: Tuple[Tuple[int, int], Direction] = ((0, 0), Direction(0)),
-                           target: Tuple[Tuple[int, int], Direction] = ((0, 0), Direction(0)),
+    def set_path_to_target(self, start: Tuple[Tuple[int, int], Direction], target: Tuple[Tuple[int, int], Direction],
                            weight: int = -1):
         """
         set path to target if available or reset
         :return: void
         """
-        if self.target is not None:
-            print('target path: ', self.shortest_path((self.position[0][0], self.position[0][1]),(self.target[0], self.target[1])) is not None)
         if self.target is not None and self.shortest_path((self.position[0][0], self.position[0][1]),
                                                           (self.target[0], self.target[1])) is not None:
-            print('change target path: ' + str((self.position[0][0], self.position[0][1])) + ' -> ' + str(self.target) +
-                  ' ,with weight: ' + str(self.distance_to((self.position[0][0], self.position[0][1]),
-                                                         (self.target[0], self.target[1]))))
-            print(self.shortest_path((self.position[0][0], self.position[0][1]), (self.target[0], self.target[1])))
+            print('add target path: ' + str((self.position[0][0], self.position[0][1])) + ' -> ' + str(self.target) +
+                  'with weight: ' + str(self.distance_to((self.position[0][0], self.position[0][1]),
+                                                        (self.target[0], self.target[1]))))
             self.path_target = self.shortest_path((self.position[0][0], self.position[0][1]),
                                                   (self.target[0], self.target[1]))
-
         if (start in self.path_target or target in self.path_target) and weight == -1:
             self.path_target = []
             print('reset path_target')
@@ -236,6 +229,7 @@ class Planet:
         """
         print('adding path: ' + str(start) + ' -> ' + str(target))
 
+        self.set_path_to_target(start, target, weight)
         '''
         if self.target is not None and self.shortest_path((self.position[0][0], self.position[0][1]),
                                                           (self.target[0], self.target[1])) is not None:
@@ -266,8 +260,6 @@ class Planet:
         if target is not None:
             self.paths[start[0]][start[1]] = (target[0], target[1], weight)
             self.paths[target[0]][target[1]] = (start[0], start[1], weight)
-        # check if path to target exists
-        self.set_path_to_target(start, target, weight)
 
     def set_planet(self, planetName, startX, startY, startOrientation):
         """
@@ -516,6 +508,14 @@ class Planet:
         return reachable
 
     def defineColorIdents(self, color, xValue, yValue):
+        """
+        check which color is on the coordinates which are both even or odd and which is on the coordinates where one
+        is even and one is ood
+        :param color: int
+        :param xValue: int
+        :param yValue: int
+        :return: void
+        """
         if color == 2 or color == 5:
             if xValue % 2 == yValue % 2:
                 self.color_same_mod2 = color
