@@ -107,7 +107,7 @@ class Planet:
         else:
             if (self.position[0][0], self.position[0][1]) == v_min:
                 print('Planet.shortest_path_to_unexplored_node: on unexplored node!')
-            elif self.shortest_path((self.position[0][0], self.position[0][1]), v_min[0]) is None:
+            elif self.shortest_path((self.position[0][0], self.position[0][1]), v_min) is None:
                 print('Planet.shortest_path_to_unexplored_node: shortest_path to unexplored node is None: ' +
                       str((self.position[0][0], self.position[0][1])) +
                       ' -> ' +
