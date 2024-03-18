@@ -9,8 +9,6 @@ import paho.mqtt.client as mqtt
 import uuid
 import signal
 import time
-import threading
-import asyncio
 
 from communication import Communication
 from odometry import Odometry
@@ -58,16 +56,15 @@ def run():
     movement.moveOnLine()   # move to first node
     planet.add_path(((planet.position[0][0], planet.position[0][1]), Direction( int((180 + planet.position[1].value) % 360))),
                     ((planet.position[0][0], planet.position[0][1]), Direction( int((180 + planet.position[1].value) % 360))), - 1)
+    # set entry path to blocked
     ev3.Sound.beep()
     planet.defineColorIdents(movement.endColor, planet.position[0][0], planet.position[0][1])
     print("same:", planet.color_same_mod2)
     print("different:", planet.color_different_mod2)
-            # block first path
-    print('prevDir: ' + str(planet.position[1].value))
-    # block first path
-    for paths in movement.findPathsOdometry(planet.position[1].value):  # robot searches for next paths -> send to Planet
+    for paths in movement.findPathsOdometry(planet.position[1].value):
         planet.discover_paths(((planet.position[0][0], planet.position[0][1]), Direction(int(paths))))
     planet.node_explored(((planet.position[0][0], planet.position[0][1]), planet.position[1]))
+    # robot searches for next paths -> send to Planet
     planet.intelligent_search()  # calc next path by Planet (intelligent search)
     while not comm.end_exploration:
         print('unexplored paths: ' + str(planet.unexplored_paths))
