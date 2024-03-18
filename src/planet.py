@@ -135,27 +135,6 @@ class Planet:
                 print('unexplored paths found: ' + str(self.unexplored_paths))
                 self.change_position(self.shortest_path_to_unexplored_path())
                 # set next path to path in track to unexplored path
-                '''
-                v_min = self.unexplored_paths[0]
-                distance_min = self.distance_to((self.position[0][0], self.position[0][1]), v_min)
-                for path in self.unexplored_paths:
-                    new_distance = self.distance_to(start=(self.position[0][0], self.position[0][1]), target=path[0])
-                    if distance_min > new_distance:
-                        v_min = path
-                        distance_min = new_distance
-                if (self.position[0][0], self.position[0][1]) == v_min[0]:
-                    self.change_position(v_min)
-                elif self.shortest_path((self.position[0][0], self.position[0][1]), v_min[0]) is None:
-                    print('Planet.intelligent_search: shortest_path to unexplored path is None: ' +
-                          str((self.position[0][0], self.position[0][1])) +
-                          ' -> ' +
-                          str(v_min[0]))
-                else:
-                    self.change_position(((self.position[0][0], self.position[0][1]),
-                                          self.shortest_path((self.position[0][0], self.position[0][1]), v_min[0])[0][
-                                              1]))
-                '''
-
             elif len(self.unexplored_nodes) > 0:
                 print('len(planet.unexplored_paths) = ' + str(len(self.unexplored_paths)))
                 print('planet.unexplored_paths_reachable() = ' + str(self.unexplored_paths_reachable()))
@@ -163,34 +142,6 @@ class Planet:
                 print('unexplored nodes found: ' + str(self.unexplored_nodes))
                 self.change_position(self.shortest_path_to_unexplored_node())
                 # set next path to path in track to unexplored node
-                '''
-                v_min = self.unexplored_nodes[0]
-                distance_min = self.distance_to((self.position[0][0], self.position[0][1]), v_min)
-                for node in self.unexplored_nodes:
-                    new_distance = self.distance_to(start=(self.position[0][0], self.position[0][1]), target=node)
-                    if distance_min > new_distance:
-                        v_min = node
-                        distance_min = new_distance
-                print('distance to min unexplored node: ' + str(
-                    (self.position[0][0], self.position[0][1])) + ' -> ' + str(v_min) +
-                      ' = ' + str(self.distance_to((self.position[0][0], self.position[0][1]), v_min)))
-                if self.distance_to((self.position[0][0], self.position[0][1]), v_min) == float('inf'):
-                    self.unexplored_nodes = []
-                    self.unexplored_paths = []
-                    print('killed all paths and nodes')
-                else:
-                    if (self.position[0][0], self.position[0][1]) == v_min:
-                        print('Planet.intelligent_search: on unexplored node!')
-                    elif self.shortest_path((self.position[0][0], self.position[0][1]), v_min[0]) is None:
-                        print('Planet.intelligent_search: shortest_path to unexplored node is None: ' +
-                              str((self.position[0][0], self.position[0][1])) +
-                              ' -> ' +
-                              str(v_min))
-                    else:
-                        self.change_position(((self.position[0][0], self.position[0][1]),
-                                              self.shortest_path((self.position[0][0], self.position[0][1]), v_min)[0][
-                                                  1]))
-                '''
             else:
                 print('Planet.intelligent_search: no unexorabled entities left: nodes: ' +
                       str(self.unexplored_nodes) + ' , paths: ' + str(self.unexplored_paths))
@@ -449,6 +400,7 @@ class Planet:
 
     @staticmethod
     def get_closest_vertex(vertices, distances):
+        # get random node from set 'vertices' and add it again right away
         v_min = vertices.pop()
         vertices.add(v_min)
 
@@ -458,14 +410,21 @@ class Planet:
                 v_min = vertex
         return v_min
 
+    # function returns list of neighbours of 'vertex' and their distances from 'vertex'
     def get_neighbours(self, vertex, vertices):
+        # list being returned
         neighbours = []
+        # loop to find all neighbours
         for direction in self.paths[vertex]:
+            # in case we choose a path with end vertex that is not in vertices (e.g. None as end node)
             if self.paths[vertex][direction][0] not in vertices:
                 continue
+            # distance of node is infinite if its path is blocked
             distance = float('inf')
             if self.paths[vertex][direction][2] != -1:
+                # otherwise distance is weight between 'vertex' and current node
                 distance = self.paths[vertex][direction][2]
+            # neighbour defined as list of [node, distance between vertex and node]
             neighbour = (self.paths[vertex][direction][0], distance)
             neighbours.append(neighbour)
         return neighbours
@@ -529,12 +488,18 @@ class Planet:
                     distances[w[0]] = new_distance
                     prev_node[w[0]] = v
         # backtracking
+        # defines first node for iteration
         current_node = target
+        # as long as we have not reached start node
         while current_node != start:
+            # loop in order to get the direction in the return list
             for direction in self.paths[prev_node[current_node]]:
+                # if we found the matching path from prev_node to current_node
                 if self.paths[prev_node[current_node]][direction][0] == current_node:
                     track.append((prev_node[current_node], direction))
+            # select next node for next iteration
             current_node = prev_node[current_node]
+        # reverse list because it is inverted
         track.reverse()
         return track
 
