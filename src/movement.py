@@ -7,14 +7,18 @@ dpt = 0.48      # distance per tick
 
 class Movement:
     def __init__(self):
-        self.white = 50 #67.5  # (245, 465, 465)
-        self.black = 1.5  # (30, 75, 75)
+        self.white = 50     # 67.5  # (245, 465, 465)
+        self.black = 1.5    # (30, 75, 75)
         self.rWheelDistances = []
         self.lWheelDistances = []
         self.status = "free"
         self.endColor = None
 
     def moveOnLine(self):
+        """
+        move the robot on a line until a node is found
+        :return: void
+        """
         self.findLine()
         self.rWheelDistances = []
         self.lWheelDistances = []
@@ -84,18 +88,19 @@ class Movement:
             self.TurnClockwise(15)
             self.moveOnLine()
         else:
-            # an Kreuzung angekommen
             self.TurnClockwise(350)
             self.moveStraight(8)
 
-
     def TurnClockwise(self, degree):
+        """
+        turns to input direction
+        :param degree: int
+        :return: void
+        """
         outB = ev3.LargeMotor("outB")
         outC = ev3.LargeMotor("outC")
         outB.reset()
         outC.reset()
-        #self.lWheelDistances = []
-        #self.rWheelDistances = []
         outB.stop_action = "brake"
         outC.stop_action = "brake"
         outB.speed_sp = 100
@@ -112,20 +117,21 @@ class Movement:
         lastPositionB = 0
         lastPositionC = 0
         while (outB.position < degree * k and outC.position < degree * k):
-            #self.rWheelDistances.append(dpt * (outC.position - lastPositionC))  # in mm !!!
-            #self.lWheelDistances.append(dpt * (outB.position - lastPositionB))
             lastPositionC = outC.position
             lastPositionB = outB.position
         outB.stop()
         outC.stop()
 
     def moveStraight(self, cm):
+        """
+        move straight for input centimeters
+        :param cm: float
+        :return: void
+        """
         outB = ev3.LargeMotor("outB")
         outC = ev3.LargeMotor("outC")
         outB.reset()
         outC.reset()
-        #self.testlWheelDistances = []
-        #self.testrWheelDistances = []
         outB.stop_action = "brake"
         outC.stop_action = "brake"
         outB.speed_sp = 150
@@ -136,9 +142,6 @@ class Movement:
         lastPositionB = 0
         lastPositionC = 0
         while (outB.position < cm * 10 / dpt and outC.position < cm * 10 / dpt):
-            # i += (outB.position - lastPositionB)
-            #self.testrWheelDistances.append(dpt * (outC.position - lastPositionC))  # in mm !!!
-            #self.testlWheelDistances.append(dpt * (outB.position - lastPositionB))
             lastPositionC = outC.position
             lastPositionB = outB.position
             time.sleep(0.1)
@@ -146,6 +149,13 @@ class Movement:
         outC.stop()
 
     def calc_luminance(self, r, g, b):
+        """
+        calculate luminance of given rgb values
+        :param r: int
+        :param g: int
+        :param b: int
+        :return: float
+        """
         r = r / 512
         g = g / 512
         b = b / 512
@@ -167,6 +177,10 @@ class Movement:
         return y * 100
 
     def currentBrightness(self):
+        """
+        calculate current brightness of the ground
+        :return: float
+        """
         colorSensor = ev3.ColorSensor()
         colorSensor.mode = 'RGB-RAW'
         listValues = []
@@ -187,8 +201,12 @@ class Movement:
         print(brightness)
         return brightness
 
-
     def findPathsOdometry(self, firstDir):
+        """
+        find the paths on a node
+        :param firstDir: int
+        :return: list
+        """
         self.TurnClockwise(180)
         self.TurnClockwise(10)
         prevdir = (firstDir + 180) % 360
@@ -238,10 +256,6 @@ class Movement:
             odometry.rValues = self.rWheelDistances
             odometry.prevDirection = newPrevDir
             direction = odometry.currentDirection()
-            #print(odometry.lValues)
-            """print("prev:", newPrevDir)
-            print("diff:", odometry.directionDifferenceOfLine())
-            print("new:", direction)"""
             if direction not in paths:
                 paths.append(direction)
                 newPrevDir = direction
@@ -253,20 +267,31 @@ class Movement:
         self.changeDirectionAbsolut(direction, firstDir)
 
         print(paths)
-        #self.TurnClockwise(5)
         return paths
 
     def getColor(self):
+        """
+        returns current color of the ground
+        :return: int
+        """
         colorsensor = ev3.ColorSensor()
         colorsensor.mode = 'COL-COLOR'
         return colorsensor.value()
 
-
     def changeDirectionAbsolut(self, prevDir, newDir):
+        """
+        changes the direction of the robot
+        :param prevDir: int
+        :param newDir: int
+        :return: void
+        """
         self.TurnClockwise((newDir - prevDir) % 360)
 
-
     def findLine(self):
+        """
+        robot finds the right border of the line
+        :return: void
+        """
         offset = (self.white + self.black) / 2
         outB = ev3.LargeMotor("outB")
         outC = ev3.LargeMotor("outC")
@@ -296,18 +321,3 @@ class Movement:
         outC.stop()
         outB.stop()
 
-    # not in use, will probably be deleted
-    def findPaths90Turn(self, prevDir):
-        paths = []
-        colorSensor = ev3.ColorSensor()
-        colorSensor.mode = 'RGB-RAW'
-        for i in range(4):
-            rgb = colorSensor.raw
-            if rgb[1] < 200:
-                paths.append((i * 90 + prevDir) % 360)
-            self.perfectTurn(90)
-        return paths
-
-
-    def perfectTurn(self, degree):
-        """turn exactly x degrees"""
