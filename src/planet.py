@@ -131,7 +131,7 @@ class Planet:
             # set next path to path in track to target
         else:
             if len(self.unexplored_paths) > 0 and self.unexplored_paths_reachable():
-                print('unexplored paths found: ' + str(self.unexplored_paths))
+                # print('unexplored paths found: ' + str(self.unexplored_paths))
                 self.change_position(self.shortest_path_to_unexplored_path())
                 # set next path to path in track to unexplored path
             elif len(self.unexplored_nodes) > 0:
